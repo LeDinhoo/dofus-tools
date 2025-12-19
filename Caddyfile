@@ -1,0 +1,3 @@
+dofus-tools.duckdns.org {
+    reverse_proxy app:3000
+}
