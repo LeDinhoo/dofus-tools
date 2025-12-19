@@ -1,22 +1,21 @@
 <script lang="ts">
-    export let data;
+  import { authClient } from "$lib/auth-client";
+
+  async function signUp() {
+    const { data, error } = await authClient.signUp.email({
+      email: "test@example.com",
+      password: "mon_super_password_long", // Mets un truc long
+      name: "Dinho",
+    });
+
+    if (error) {
+      console.error("Détails de l'erreur :", error.message);
+      alert("Erreur : " + error.message);
+    } else {
+      console.log("Compte créé !", data);
+      alert("Compte créé avec succès !");
+    }
+  }
 </script>
 
-<main style="font-family: sans-serif; padding: 2rem;">
-    <h1>Ma Liste Docker + Prisma</h1>
-
-    {#if data.todos.length === 0}
-        <p>Aucune tâche trouvée. La base est vide mais connectée !</p>
-    {:else}
-        <ul>
-            {#each data.todos as todo}
-                <li>
-                    <span style={todo.completed ? "text-decoration: line-through" : ""}>
-                        {todo.task}
-                    </span>
-                    <small>(créé le {todo.createdAt.toLocaleDateString()})</small>
-                </li>
-            {/each}
-        </ul>
-    {/if}
-</main>
+<button on:click={signUp}>Tester l'inscription</button>
