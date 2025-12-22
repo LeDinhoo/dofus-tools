@@ -1,10 +1,9 @@
-import { auth } from "$lib/auth"; // Importe la config qu'on vient de faire
-import type { RequestHandler } from "./$types";
+// Importe votre configuration d'authentification (définie ailleurs)
+import { auth } from "$lib/server/auth";
+import type { RequestHandler } from "@sveltejs/kit";
 
-export const GET: RequestHandler = ({ request }) => {
-  return auth.handler(request);
-};
+// Gère les requêtes de lecture (ex: récupérer la session, callback OAuth)
+export const GET: RequestHandler = ({ request }) => auth.handler(request);
 
-export const POST: RequestHandler = ({ request }) => {
-  return auth.handler(request);
-};
+// Gère les actions (ex: se connecter, s'inscrire, se déconnecter)
+export const POST: RequestHandler = ({ request }) => auth.handler(request);

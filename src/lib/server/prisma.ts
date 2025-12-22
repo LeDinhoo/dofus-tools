@@ -1,5 +1,5 @@
 // place files you want to import through the `$lib` alias in this folder.
-import { PrismaClient } from "../generated/prisma/client.js";
+import { PrismaClient } from "../../generated/prisma/client.js";
 import { env } from "$env/dynamic/private";
 import { PrismaPg } from "@prisma/adapter-pg";
 

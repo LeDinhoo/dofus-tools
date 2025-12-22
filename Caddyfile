@@ -1,4 +1,4 @@
-dofus-tools.duckdns.org {
+otomai.dinho.me {
     reverse_proxy app:3000
 }
 
