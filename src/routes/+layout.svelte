@@ -2,6 +2,8 @@
   import favicon from "$lib/assets/favicon.svg";
   import "../app.css";
   import { Toaster } from "$lib/components/ui/sonner/index.js";
+  import * as Sidebar from "$lib/components/ui/sidebar/index.js";
+  import AppSidebar from "$lib/components/app-sidebar.svelte";
 
   let { children } = $props();
 </script>
@@ -11,4 +13,9 @@
 </svelte:head>
 
 <Toaster />
-{@render children()}
+<Sidebar.Provider>
+  <AppSidebar />
+  <main class="w-full pl-4 pr-12 pt-8">
+    {@render children?.()}
+  </main>
+</Sidebar.Provider>
