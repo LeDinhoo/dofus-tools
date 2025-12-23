@@ -7,12 +7,7 @@ datasource db {
   provider = "postgresql"
 }
 
-model Todo {
-  id        Int      @id @default(autoincrement())
-  createdAt DateTime @default(now())
-  task      String
-  completed Boolean  @default(false)
-}
+// --- TES MODÈLES AUTH (Conservés) ---
 
 model User {
   id            String    @id
@@ -70,4 +65,24 @@ model Verification {
   updatedAt  DateTime?
 
   @@map("verification")
+}
+
+// --- TON MODÈLE ITEM SIMPLIFIÉ ---
+
+model Item {
+  id          Int      @id @default(autoincrement())
+  nom         String
+  prixAchat   Float
+  prixVente   Float?   @default(0)
+  benefit     Float    // Attention: champ obligatoire, on le calculera si manquant
+  createdAt   DateTime @default(now())
+  statusVente Boolean  @default(false)
+  category    String   @default("general")
+
+  imageUrl    String?
+  type        String?
+  superType   String?
+
+  unit        Float?
+  size        Float?
 }

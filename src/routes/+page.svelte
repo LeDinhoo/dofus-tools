@@ -5,12 +5,3 @@
 
 <h1>Bienvenue sur Dofus Tools, {data.user?.name} !</h1>
 <p>Si tu vois cette page, c'est que l'authentification fonctionne.</p>
-
-<button
-  onclick={async () => {
-    await authClient.signOut();
-    window.location.reload();
-  }}
->
-  Se déconnecter
-</button>
