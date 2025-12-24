@@ -49,7 +49,9 @@
   }
 </script>
 
-<div class="flex flex-row items-center justify-center">
+<div
+  class="flex flex-row items-center justify-center gap-4 p-4 bg-muted rounded-lg border"
+>
   <form
     action="?/createItem"
     method="POST"
@@ -58,7 +60,7 @@
       handleSubmit({ formData });
     }}
   >
-    <div class="flex w-full flex-row gap-4">
+    <div class="flex flex-wrap w-full flex-row gap-4">
       <SearchInput
         placeholder="Rechercher un objet"
         bind:value={name}

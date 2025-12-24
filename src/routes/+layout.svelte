@@ -1,5 +1,5 @@
 <script lang="ts">
-  import favicon from "$lib/assets/favicon.svg";
+  import favicon from "$lib/assets/otomai.png";
   import "../app.css";
   import { Toaster } from "$lib/components/ui/sonner/index.js";
   import * as Sidebar from "$lib/components/ui/sidebar/index.js";

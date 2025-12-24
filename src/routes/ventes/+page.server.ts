@@ -1,81 +1,54 @@
 import prisma from "$lib/server/prisma";
 import { fail } from "@sveltejs/kit";
-import type { Actions } from "@sveltejs/kit";
-import { parse } from "svelte/compiler";
+import { message, superValidate } from "sveltekit-superforms";
+import { zod4 } from "sveltekit-superforms/adapters";
+import { z } from "zod";
+import { toast } from "svelte-sonner";
 
 export const load = async () => {
   const items = await prisma.item.findMany({
     orderBy: { createdAt: "desc" },
   });
-
-  return { items };
+  const form = await superValidate(zod4(itemSchema));
+  return { items, form };
 };
 
-export const actions: Actions = {
+// Schéma de validation Zod pour un item
+const itemSchema = z.object({
+  nom: z.string().min(1, "Nom requis"),
+  category: z.string().min(1),
+  size: z.number(),
+  unit: z.number(),
+  prixAchat: z.number(),
+  prixVente: z.number().default(0),
+  statusVente: z.boolean().default(false),
+  imageUrl: z.string().optional(),
+  type: z.string().optional(),
+  superType: z.string().optional(),
+});
+
+export const actions = {
   createItem: async ({ request }) => {
-    const data = await request.formData();
+    const form = await superValidate(request, zod4(itemSchema));
 
-    console.log(
-      "Données du formulaire reçues:",
-      Object.fromEntries(data.entries())
-    );
-
-    const nom = data.get("nom") as string;
-    const category = data.get("category") as string;
-    const size = parseFloat(data.get("size") as string);
-    const unit = parseFloat(data.get("unit") as string);
-    const prixAchatStr = data.get("prixAchat") as string;
-    // Si prix de vente est vide, on le met à 0
-    const prixVenteStr = (data.get("prixVente") as string) || "0";
-    const statusVente =
-      (data.get("statusVente") as string) === "true" ? true : false;
-    const benefit = parseFloat(prixVenteStr) - parseFloat(prixAchatStr);
-    const imageUrl = data.get("imageUrl") as string | null;
-    const type = data.get("type") as string | null;
-    const superType = data.get("superType") as string | null;
-
-    if (!nom || !category || !prixAchatStr) {
-      return fail(400, { message: "Tous les champs sont requis" });
+    if (!form.valid) {
+      return fail(400, { form });
     }
 
-    const prixAchat = parseFloat(prixAchatStr);
-    const prixVente = parseFloat(prixVenteStr);
-
-    if (isNaN(prixAchat)) {
-      return fail(400, { message: "Les prix doivent être des nombres" });
-    }
-
-    console.log("Création de l'item avec:", {
-      nom,
-      prixAchat,
-      prixVente,
-      statusVente,
-      benefit,
-    });
+    const benefit = form.data.prixVente - form.data.prixAchat;
 
     try {
       await prisma.item.create({
         data: {
-          nom,
-          category,
-          unit,
-          size,
-          prixAchat,
-          prixVente,
-          statusVente,
+          ...form.data,
           benefit,
-          imageUrl,
-          type,
-          superType,
         },
       });
     } catch (err) {
-      console.error("L'ERREUR PRISMA EST :", err);
-
-      return fail(500, { message: "Erreur lors de la création de l'item" });
+      return toast.error("Erreur lors de la création de l'item");
     }
 
-    return { success: true };
+    return { form };
   },
 
   // 1. AJOUTER CETTE NOUVELLE ACTION
@@ -137,6 +110,53 @@ export const actions: Actions = {
       });
     } catch (err) {
       return fail(500, { message: "Erreur lors de la réinitialisation" });
+    }
+
+    return { success: true };
+  },
+
+  updateItem: async ({ request }) => {
+    const data = await request.formData();
+
+    console.log(
+      "Données reçues pour la mise à jour :",
+      Array.from(data.entries())
+    );
+
+    // 1. Récupération et conversion des données
+    const idStr = data.get("id") as string;
+    const nom = data.get("nom") as string;
+    const prixAchatStr = data.get("prixAchat") as string;
+    const prixVenteStr = data.get("prixVente") as string;
+
+    // Validation basique
+    if (!idStr || !nom || !prixAchatStr || !prixVenteStr) {
+      return fail(400, {
+        message: "Tous les champs (ID, Nom, Prix) sont requis",
+      });
+    }
+
+    try {
+      const id = parseInt(idStr, 10);
+      const prixAchat = parseFloat(prixAchatStr);
+      const prixVente = parseFloat(prixVenteStr);
+
+      // 2. Recalcul du bénéfice
+      const benefit = prixVente - prixAchat;
+
+      // 3. Mise à jour Prisma
+      await prisma.item.update({
+        where: { id: id },
+        data: {
+          nom,
+          prixAchat,
+          prixVente,
+          benefit, // On sauvegarde le nouveau bénéfice calculé
+        },
+      });
+    } catch (err) {
+      console.error("Erreur update:", err);
+      return fail(500, { message: "Erreur lors de la modification de l'item" });
     }
 
     return { success: true };
