@@ -2,6 +2,6 @@ otomai.dinho.me {
     reverse_proxy app:3000
 }
 
-bars.dinho.me {
+bars-a-chich.duckdns.org {
     reverse_proxy host.docker.internal:3001 
 }
