@@ -2,11 +2,15 @@ import { auth } from "../src/lib/server/auth"; // path to your auth file
 import { svelteKitHandler } from "better-auth/svelte-kit";
 import { building } from "$app/environment";
 import { redirect, type Handle } from "@sveltejs/kit";
+import { sequence } from "@sveltejs/kit/hooks";
 
-export const handle: Handle = async ({ event, resolve }) => {
-  // D'abord, on laisse Better Auth gérer l'authentification et peupler event.locals
-  const response = await svelteKitHandler({ event, resolve, auth, building });
+// Premier handle : Better Auth peuple event.locals
+const authHandle: Handle = async ({ event, resolve }) => {
+  return svelteKitHandler({ event, resolve, auth, building });
+};
 
+// Deuxième handle : Protection des routes
+const protectionHandle: Handle = async ({ event, resolve }) => {
   // Protection des routes (sauf pendant le build)
   if (!building) {
     const session = event.locals.session;
@@ -27,5 +31,8 @@ export const handle: Handle = async ({ event, resolve }) => {
     }
   }
 
-  return response;
-}
+  return resolve(event);
+};
+
+// Enchaîne les deux handles
+export const handle = sequence(authHandle, protectionHandle);
