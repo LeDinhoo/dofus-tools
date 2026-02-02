@@ -9,8 +9,11 @@ export const load = async () => {
   const items = await prisma.item.findMany({
     orderBy: { createdAt: "desc" },
   });
+  const equipments = await prisma.equipment.findMany({
+    orderBy: { createdAt: "desc" },
+  });
   const form = await superValidate(zod4(itemSchema));
-  return { items, form };
+  return { items, equipments, form };
 };
 
 // Schéma de validation Zod pour un item
@@ -25,6 +28,16 @@ const itemSchema = z.object({
   imageUrl: z.string().optional(),
   type: z.string().optional(),
   superType: z.string().optional(),
+});
+
+// Schéma de validation Zod pour un équipement
+const equipmentSchema = z.object({
+  nom: z.string().min(1, "Nom requis"),
+  prix: z.number(),
+  imageUrl: z.string().optional(),
+  type: z.string().optional(),
+  superType: z.string().optional(),
+  obtained: z.boolean().default(false),
 });
 
 export const actions = {
@@ -183,6 +196,74 @@ export const actions = {
     } catch (err) {
       console.error("Erreur update:", err);
       return fail(500, { message: "Erreur lors de la modification de l'item" });
+    }
+
+    return { success: true };
+  },
+
+  // --- ACTIONS POUR LES ÉQUIPEMENTS ---
+  createEquipment: async ({ request }) => {
+    const form = await superValidate(request, zod4(equipmentSchema));
+
+    if (!form.valid) {
+      return fail(400, { form });
+    }
+
+    try {
+      await prisma.equipment.create({
+        data: {
+          nom: form.data.nom,
+          prix: form.data.prix,
+          imageUrl: form.data.imageUrl,
+          type: form.data.type,
+          superType: form.data.superType,
+          obtained: form.data.obtained,
+        },
+      });
+    } catch (err) {
+      return toast.error("Erreur lors de la création de l'équipement");
+    }
+
+    return { form };
+  },
+
+  deleteEquipment: async ({ request }) => {
+    const data = await request.formData();
+    const idStr = data.get("id") as string;
+
+    if (!idStr) {
+      return fail(400, { message: "ID manquant pour la suppression" });
+    }
+
+    try {
+      const id = parseInt(idStr, 10);
+      await prisma.equipment.delete({
+        where: { id: id },
+      });
+    } catch (err) {
+      console.error("Erreur lors de la suppression:", err);
+      return fail(500, { message: "Impossible de supprimer l'équipement" });
+    }
+
+    return { success: true };
+  },
+
+  toggleEquipmentObtained: async ({ request }) => {
+    const data = await request.formData();
+    const idStr = data.get("id") as string;
+    const obtainedStr = data.get("obtained") as string;
+
+    if (!idStr) return fail(400, { message: "ID manquant" });
+
+    try {
+      await prisma.equipment.update({
+        where: { id: parseInt(idStr) },
+        data: {
+          obtained: obtainedStr === "true",
+        },
+      });
+    } catch (err) {
+      return fail(500, { message: "Erreur lors de la mise à jour" });
     }
 
     return { success: true };

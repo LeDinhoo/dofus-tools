@@ -11,6 +11,11 @@
   import { Label } from "$lib/components/ui/label";
   import * as Dialog from "$lib/components/ui/dialog/index.js";
   import { browser } from "$app/environment";
+  import AddEquipment from "$lib/components/AddEquipment.svelte";
+  import Trash from "@lucide/svelte/icons/trash-2";
+  import Check from "@lucide/svelte/icons/check";
+  import X from "@lucide/svelte/icons/x";
+  import { enhance } from "$app/forms";
 
   let { data } = $props();
 
@@ -67,21 +72,29 @@
     .filter(item => item.statusVente)
     .reduce((sum, item) => sum + item.benefit, 0));
 
+  // Calcul du coût total des équipements non obtenus
+  const totalEquipements = $derived(data.equipments?.filter(e => !e.obtained).reduce((sum, e) => sum + e.prix, 0) || 0);
+
   // Statistiques avancées pour la page Statistiques
   const capitalTotal = $derived(totalDepense + gainReel);
   const itemsVendus = $derived(data.items.filter(item => item.statusVente).length);
   const itemsEnVente = $derived(data.items.filter(item => !item.statusVente).length);
   const tauxReussite = $derived(data.items.length > 0 ? (itemsVendus / data.items.length) * 100 : 0);
 
-  // Utiliser l'objectif personnalisé
-  const progressionPourcent = $derived((capitalTotal / objectifMontant) * 100);
-  const restantPourObjectif = $derived(objectifMontant - capitalTotal);
+  // Utiliser l'objectif personnalisé en incluant les équipements
+  const objectifTotal = $derived(objectifMontant + totalEquipements);
+  const progressionPourcent = $derived((capitalTotal / objectifTotal) * 100);
+  const restantPourObjectif = $derived(objectifTotal - capitalTotal);
 
   // Calcul des jours restants jusqu'à la date objectif
   const aujourdhui = new Date();
   const dateFinObjectif = $derived(new Date(objectifDate));
   const joursRestants = $derived(Math.ceil((dateFinObjectif.getTime() - aujourdhui.getTime()) / (1000 * 60 * 60 * 24)));
   const kamasParJour = $derived(joursRestants > 0 ? Math.ceil(restantPourObjectif / joursRestants) : 0);
+
+  // Nombre d'équipements
+  const nombreEquipements = $derived(data.equipments?.length || 0);
+  const equipementsObtenus = $derived(data.equipments?.filter(e => e.obtained).length || 0);
 
   // ROI moyen
   const roiMoyen = $derived(totalDepense > 0 ? ((gainReel / totalDepense) * 100) : 0);
@@ -123,8 +136,9 @@
   <HeaderItem />
 
   <Tabs.Root value="hotel" class="w-full">
-    <Tabs.List class="grid w-full grid-cols-2">
+    <Tabs.List class="grid w-full grid-cols-3">
       <Tabs.Trigger value="hotel">Hôtel de Vente</Tabs.Trigger>
+      <Tabs.Trigger value="equipement">Équipement</Tabs.Trigger>
       <Tabs.Trigger value="stats">Statistiques</Tabs.Trigger>
     </Tabs.List>
 
@@ -160,14 +174,108 @@
       <DataTable data={data.items} {columns} />
     </Tabs.Content>
 
+    <!-- Onglet Équipement -->
+    <Tabs.Content value="equipement" class="space-y-4">
+      <AddEquipment />
+
+      <!-- Liste des équipements -->
+      <div class="rounded-lg border bg-card p-6">
+        <h3 class="text-lg font-bold mb-4">Équipements souhaités</h3>
+
+        {#if data.equipments && data.equipments.length > 0}
+          <div class="space-y-2">
+            {#each data.equipments as equipment}
+              <div class="flex items-center justify-between p-3 rounded-lg bg-muted">
+                <div class="flex items-center gap-3">
+                  {#if equipment.imageUrl}
+                    <img src={equipment.imageUrl} alt={equipment.nom} class="w-10 h-10 rounded object-contain" />
+                  {/if}
+                  <div>
+                    <span class="font-medium {equipment.obtained ? 'line-through text-muted-foreground' : ''}">{equipment.nom}</span>
+                    <div class="text-sm text-muted-foreground flex items-center gap-1">
+                      {formatNumber(equipment.prix)}
+                      <img class="size-3" src="/Kama.png" alt="Kama">
+                    </div>
+                  </div>
+                </div>
+
+                <div class="flex items-center gap-2">
+                  <!-- Toggle obtenu -->
+                  <form
+                    action="?/toggleEquipmentObtained"
+                    method="POST"
+                    use:enhance
+                  >
+                    <input type="hidden" name="id" value={equipment.id} />
+                    <input type="hidden" name="obtained" value={!equipment.obtained} />
+                    <Button
+                      type="submit"
+                      size="sm"
+                      variant={equipment.obtained ? "default" : "outline"}
+                      class="h-8 w-8 p-0"
+                    >
+                      {#if equipment.obtained}
+                        <Check class="h-4 w-4" />
+                      {:else}
+                        <X class="h-4 w-4" />
+                      {/if}
+                    </Button>
+                  </form>
+
+                  <!-- Supprimer -->
+                  <form
+                    action="?/deleteEquipment"
+                    method="POST"
+                    use:enhance
+                  >
+                    <input type="hidden" name="id" value={equipment.id} />
+                    <Button type="submit" size="sm" variant="destructive" class="h-8 w-8 p-0">
+                      <Trash class="h-4 w-4" />
+                    </Button>
+                  </form>
+                </div>
+              </div>
+            {/each}
+          </div>
+        {:else}
+          <p class="text-center text-muted-foreground py-8">Aucun équipement ajouté</p>
+        {/if}
+      </div>
+
+      <!-- Résumé des équipements -->
+      <div class="grid grid-cols-2 gap-4">
+        <div class="rounded-lg border bg-card p-6">
+          <h4 class="text-sm font-medium text-muted-foreground mb-2">Total à investir</h4>
+          <div class="text-2xl font-bold text-red-500 flex items-center gap-2">
+            {formatNumber(data.equipments?.filter(e => !e.obtained).reduce((sum, e) => sum + e.prix, 0) || 0)}
+            <img class="size-5" src="/Kama.png" alt="Kama">
+          </div>
+        </div>
+
+        <div class="rounded-lg border bg-card p-6">
+          <h4 class="text-sm font-medium text-muted-foreground mb-2">Équipements obtenus</h4>
+          <div class="text-2xl font-bold text-emerald-600">
+            {data.equipments?.filter(e => e.obtained).length || 0} / {data.equipments?.length || 0}
+          </div>
+        </div>
+      </div>
+    </Tabs.Content>
+
     <!-- Onglet Statistiques -->
     <Tabs.Content value="stats" class="space-y-6">
       <!-- Objectif personnalisé -->
       <div class="rounded-lg border bg-card p-6">
         <div class="flex items-center justify-between mb-4">
-          <h3 class="text-xl font-bold flex items-center gap-2">
-            🎯 Objectif : {formatNumber(objectifMontant)} Kamas
-          </h3>
+          <div>
+            <h3 class="text-xl font-bold flex items-center gap-2">
+              🎯 Objectif : {formatNumber(objectifMontant)} Kamas
+            </h3>
+            {#if totalEquipements > 0}
+              <p class="text-sm text-muted-foreground mt-1">
+                + {formatNumber(totalEquipements)} K pour équipements = {formatNumber(objectifTotal)} K total
+              </p>
+            {/if}
+          </div>
           <Button variant="outline" size="sm" onclick={ouvrirDialogObjectif}>
             Modifier
           </Button>
@@ -188,7 +296,7 @@
             </div>
             <div class="flex justify-between text-xs text-muted-foreground">
               <span>{formatNumber(capitalTotal)} K</span>
-              <span>{formatNumber(objectifMontant)} K</span>
+              <span>{formatNumber(objectifTotal)} K</span>
             </div>
           </div>
 

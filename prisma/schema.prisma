@@ -87,3 +87,16 @@ model Item {
   unit        Float?
   size        Float?
 }
+
+// --- MODÈLE EQUIPMENT (équipements souhaités) ---
+
+model Equipment {
+  id          Int      @id @default(autoincrement())
+  nom         String
+  prix        Float    // Prix que l'utilisateur souhaite payer
+  createdAt   DateTime @default(now())
+  imageUrl    String?
+  type        String?
+  superType   String?
+  obtained    Boolean  @default(false) // true si l'équipement a été obtenu
+}
