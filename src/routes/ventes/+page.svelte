@@ -6,8 +6,57 @@
   import { drawer } from "$lib/drawerStore.svelte.js";
   import ModifyItem from "$lib/components/ModifyItem.svelte";
   import * as Tabs from "$lib/components/ui/tabs/index.js";
+  import Button from "$lib/components/ui/button/button.svelte";
+  import { Input } from "$lib/components/ui/input";
+  import { Label } from "$lib/components/ui/label";
+  import * as Dialog from "$lib/components/ui/dialog/index.js";
+  import { browser } from "$app/environment";
 
-  export let data;
+  let { data } = $props();
+
+  // Gestion de l'objectif personnalisé (stocké dans localStorage)
+  let objectifMontant = $state(1_000_000_000);
+  let objectifDate = $state('2026-12-31');
+  let showObjectifDialog = $state(false);
+
+  // Formulaire de modification
+  let nouveauMontant = $state('');
+  let nouvelleDate = $state('');
+
+  // Charger l'objectif depuis localStorage au montage
+  $effect(() => {
+    if (browser) {
+      const saved = localStorage.getItem('dofus-objectif');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        objectifMontant = parsed.montant;
+        objectifDate = parsed.date;
+      }
+    }
+  });
+
+  function ouvrirDialogObjectif() {
+    nouveauMontant = (objectifMontant / 1_000_000).toString();
+    nouvelleDate = objectifDate;
+    showObjectifDialog = true;
+  }
+
+  function sauvegarderObjectif() {
+    const montant = parseFloat(nouveauMontant) * 1_000_000;
+    if (montant > 0 && nouvelleDate) {
+      objectifMontant = montant;
+      objectifDate = nouvelleDate;
+
+      if (browser) {
+        localStorage.setItem('dofus-objectif', JSON.stringify({
+          montant: objectifMontant,
+          date: objectifDate
+        }));
+      }
+
+      showObjectifDialog = false;
+    }
+  }
 
   // Calcul des statistiques de base
   $: totalDepense = data.items.reduce((sum, item) => sum + item.prixAchat, 0);
@@ -24,15 +73,14 @@
   $: itemsEnVente = data.items.filter(item => !item.statusVente).length;
   $: tauxReussite = data.items.length > 0 ? (itemsVendus / data.items.length) * 100 : 0;
 
-  // Objectif 1 milliard
-  const objectif = 1_000_000_000;
-  $: progressionPourcent = (capitalTotal / objectif) * 100;
-  $: restantPourObjectif = objectif - capitalTotal;
+  // Utiliser l'objectif personnalisé
+  $: progressionPourcent = (capitalTotal / objectifMontant) * 100;
+  $: restantPourObjectif = objectifMontant - capitalTotal;
 
-  // Calcul des jours restants jusqu'à fin 2026
-  const finAnnee = new Date('2026-12-31');
+  // Calcul des jours restants jusqu'à la date objectif
   const aujourdhui = new Date();
-  $: joursRestants = Math.ceil((finAnnee.getTime() - aujourdhui.getTime()) / (1000 * 60 * 60 * 24));
+  $: dateFinObjectif = new Date(objectifDate);
+  $: joursRestants = Math.ceil((dateFinObjectif.getTime() - aujourdhui.getTime()) / (1000 * 60 * 60 * 24));
   $: kamasParJour = joursRestants > 0 ? Math.ceil(restantPourObjectif / joursRestants) : 0;
 
   // ROI moyen
@@ -110,11 +158,16 @@
 
     <!-- Onglet Statistiques -->
     <Tabs.Content value="stats" class="space-y-6">
-      <!-- Objectif 1 Milliard -->
+      <!-- Objectif personnalisé -->
       <div class="rounded-lg border bg-card p-6">
-        <h3 class="text-xl font-bold mb-4 flex items-center gap-2">
-          🎯 Objectif : 1 Milliard de Kamas
-        </h3>
+        <div class="flex items-center justify-between mb-4">
+          <h3 class="text-xl font-bold flex items-center gap-2">
+            🎯 Objectif : {formatNumber(objectifMontant)} Kamas
+          </h3>
+          <Button variant="outline" size="sm" onclick={ouvrirDialogObjectif}>
+            Modifier
+          </Button>
+        </div>
 
         <div class="space-y-4">
           <!-- Barre de progression -->
@@ -131,7 +184,7 @@
             </div>
             <div class="flex justify-between text-xs text-muted-foreground">
               <span>{formatNumber(capitalTotal)} K</span>
-              <span>{formatNumber(objectif)} K</span>
+              <span>{formatNumber(objectifMontant)} K</span>
             </div>
           </div>
 
@@ -245,4 +298,46 @@
   </Tabs.Root>
 
   <ModifyItem bind:open={drawer.open} item={drawer.selectedObject} />
+
+  <!-- Dialog pour modifier l'objectif -->
+  <Dialog.Root bind:open={showObjectifDialog}>
+    <Dialog.Content class="sm:max-w-[425px]">
+      <Dialog.Header>
+        <Dialog.Title>Modifier l'objectif</Dialog.Title>
+        <Dialog.Description>
+          Définissez votre objectif de Kamas et la date cible
+        </Dialog.Description>
+      </Dialog.Header>
+      <div class="grid gap-4 py-4">
+        <div class="grid gap-2">
+          <Label for="montant">Montant (en millions de Kamas)</Label>
+          <Input
+            id="montant"
+            type="number"
+            bind:value={nouveauMontant}
+            placeholder="30"
+          />
+          <p class="text-xs text-muted-foreground">
+            Exemple : 30 pour 30 millions de Kamas
+          </p>
+        </div>
+        <div class="grid gap-2">
+          <Label for="date">Date cible</Label>
+          <Input
+            id="date"
+            type="date"
+            bind:value={nouvelleDate}
+          />
+        </div>
+      </div>
+      <Dialog.Footer>
+        <Button variant="outline" onclick={() => showObjectifDialog = false}>
+          Annuler
+        </Button>
+        <Button onclick={sauvegarderObjectif}>
+          Sauvegarder
+        </Button>
+      </Dialog.Footer>
+    </Dialog.Content>
+  </Dialog.Root>
 </div>
