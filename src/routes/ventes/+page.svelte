@@ -28,25 +28,25 @@
 
   <!-- Statistiques -->
   <div class="grid grid-cols-3 gap-4">
-    <div class="rounded-lg border bg-card p-4 flex flex-row items-center">
-      <div class="text-sm font-medium text-muted-foreground mb-1">Total Dépensé</div>
-      <div class="text-xl font-bold text-red-500 flex items-center gap-2">
+    <div class="rounded-lg border bg-card p-2 px-3 flex flex-row items-center gap-2">
+      <div class="text-sm font-medium text-muted-foreground">Total Dépensé</div>
+      <div class="text-md font-bold text-red-500 flex items-center gap-2">
         {formatNumber(totalDepense)}
         <img class="size-4" src="/Kama.png" alt="Kama">
       </div>
     </div>
 
-    <div class="rounded-lg border bg-card p-4 flex flex-row items-center">
-      <div class="text-sm font-medium text-muted-foreground mb-1">Gain Potentiel</div>
-      <div class="text-xl font-bold text-amber-600 flex items-center gap-2">
+    <div class="rounded-lg border bg-card p-2 px-3 flex flex-row items-center gap-2">
+      <div class="text-sm font-medium text-muted-foreground">Gain Potentiel</div>
+      <div class="text-md font-bold text-amber-600 flex items-center gap-2">
         {formatNumber(gainPotentiel)}
         <img class="size-4" src="/Kama.png" alt="Kama">
       </div>
     </div>
 
-    <div class="rounded-lg border bg-card p-4 flex flex-row items-center">
-      <div class="text-sm font-medium text-muted-foreground mb-1">Gain Réel</div>
-      <div class="text-xl font-bold text-emerald-600 flex items-center gap-2">
+    <div class="rounded-lg border bg-card p-2 px-3 flex flex-row items-center gap-2">
+      <div class="text-sm font-medium text-muted-foreground">Gain Réel</div>
+      <div class="text-md font-bold text-emerald-600 flex items-center gap-2">
         {formatNumber(gainReel)}
         <img class="size-4" src="/Kama.png" alt="Kama">
       </div>
