@@ -22,16 +22,6 @@ function formatNumber(num: number, separator: string = "  "): string {
   return integerPartFormatted + decimalPart;
 }
 
-const categoryLabels: { [key: string]: string } = {
-  tous: "Tous",
-  ames: "Âmes",
-  equipements: "Équipements",
-  consommables: "Consommables",
-  creatures: "Créatures",
-  cosmetiques: "Cosmétiques",
-  runes: "Runes",
-};
-
 export type Item = {
   id: number;
   nom: string;
@@ -72,14 +62,6 @@ export const columns: ColumnDef<Item>[] = [
       });
 
       return renderSnippet(snippet, { name, img });
-    },
-  },
-  {
-    accessorKey: "category",
-    header: "Catégorie",
-    cell: ({ row }) => {
-      const categoryValue = row.original.category;
-      return categoryLabels[categoryValue] || categoryValue;
     },
   },
   // --- MODIFICATION PRIX ACHAT ---
