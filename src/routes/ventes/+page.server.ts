@@ -35,14 +35,34 @@ export const actions = {
       return fail(400, { form });
     }
 
-    const benefit = form.data.prixVente - form.data.prixAchat;
+    const size = form.data.size || 1;
+    const prixAchatTotal = form.data.prixAchat;
+    const prixVenteTotal = form.data.prixVente;
+
+    // Calculer le prix unitaire
+    const prixAchatUnitaire = Math.round(prixAchatTotal / size);
+    const prixVenteUnitaire = prixVenteTotal ? Math.round(prixVenteTotal / size) : 0;
+    const benefitUnitaire = prixVenteUnitaire - prixAchatUnitaire;
 
     try {
-      await prisma.item.create({
-        data: {
-          ...form.data,
-          benefit,
-        },
+      // Créer `size` objets individuels avec size=1
+      const itemsToCreate = Array.from({ length: size }, () => ({
+        nom: form.data.nom,
+        category: form.data.category,
+        size: 1, // Chaque objet a size=1
+        unit: form.data.unit,
+        prixAchat: prixAchatUnitaire,
+        prixVente: prixVenteUnitaire,
+        benefit: benefitUnitaire,
+        statusVente: form.data.statusVente,
+        imageUrl: form.data.imageUrl,
+        type: form.data.type,
+        superType: form.data.superType,
+      }));
+
+      // Créer tous les objets en une seule transaction
+      await prisma.item.createMany({
+        data: itemsToCreate,
       });
     } catch (err) {
       return toast.error("Erreur lors de la création de l'item");
