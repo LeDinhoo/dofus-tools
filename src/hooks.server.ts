@@ -14,19 +14,34 @@ const protectionHandle: Handle = async ({ event, resolve }) => {
   // Protection des routes (sauf pendant le build)
   if (!building) {
     const session = event.locals.session;
+    const user = event.locals.user;
     const pathname = event.url.pathname;
+
+    // Debug logs
+    console.log('Protection check:', {
+      pathname,
+      hasSession: !!session,
+      hasUser: !!user,
+      sessionData: session ? 'exists' : 'null',
+      userData: user ? 'exists' : 'null'
+    });
 
     // Routes publiques (pas besoin d'être connecté)
     const publicRoutes = ['/login', '/api'];
     const isPublicRoute = publicRoutes.some(route => pathname.startsWith(route));
 
+    // Vérifier si l'utilisateur est connecté (session OU user)
+    const isAuthenticated = !!(session || user);
+
     // Si l'utilisateur n'est pas connecté et essaie d'accéder à une route protégée
-    if (!session && !isPublicRoute) {
+    if (!isAuthenticated && !isPublicRoute) {
+      console.log('Redirecting to login - no auth');
       throw redirect(303, '/login');
     }
 
     // Si l'utilisateur est connecté et va sur /login, rediriger vers la page d'accueil
-    if (session && pathname === '/login') {
+    if (isAuthenticated && pathname === '/login') {
+      console.log('Redirecting to home - already authenticated');
       throw redirect(303, '/');
     }
   }
