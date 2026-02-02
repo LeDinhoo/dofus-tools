@@ -59,38 +59,38 @@
   }
 
   // Calcul des statistiques de base
-  $: totalDepense = data.items.reduce((sum, item) => sum + item.prixAchat, 0);
-  $: gainPotentiel = data.items
+  const totalDepense = $derived(data.items.reduce((sum, item) => sum + item.prixAchat, 0));
+  const gainPotentiel = $derived(data.items
     .filter(item => !item.statusVente)
-    .reduce((sum, item) => sum + item.benefit, 0);
-  $: gainReel = data.items
+    .reduce((sum, item) => sum + item.benefit, 0));
+  const gainReel = $derived(data.items
     .filter(item => item.statusVente)
-    .reduce((sum, item) => sum + item.benefit, 0);
+    .reduce((sum, item) => sum + item.benefit, 0));
 
   // Statistiques avancées pour la page Statistiques
-  $: capitalTotal = totalDepense + gainReel;
-  $: itemsVendus = data.items.filter(item => item.statusVente).length;
-  $: itemsEnVente = data.items.filter(item => !item.statusVente).length;
-  $: tauxReussite = data.items.length > 0 ? (itemsVendus / data.items.length) * 100 : 0;
+  const capitalTotal = $derived(totalDepense + gainReel);
+  const itemsVendus = $derived(data.items.filter(item => item.statusVente).length);
+  const itemsEnVente = $derived(data.items.filter(item => !item.statusVente).length);
+  const tauxReussite = $derived(data.items.length > 0 ? (itemsVendus / data.items.length) * 100 : 0);
 
   // Utiliser l'objectif personnalisé
-  $: progressionPourcent = (capitalTotal / objectifMontant) * 100;
-  $: restantPourObjectif = objectifMontant - capitalTotal;
+  const progressionPourcent = $derived((capitalTotal / objectifMontant) * 100);
+  const restantPourObjectif = $derived(objectifMontant - capitalTotal);
 
   // Calcul des jours restants jusqu'à la date objectif
   const aujourdhui = new Date();
-  $: dateFinObjectif = new Date(objectifDate);
-  $: joursRestants = Math.ceil((dateFinObjectif.getTime() - aujourdhui.getTime()) / (1000 * 60 * 60 * 24));
-  $: kamasParJour = joursRestants > 0 ? Math.ceil(restantPourObjectif / joursRestants) : 0;
+  const dateFinObjectif = $derived(new Date(objectifDate));
+  const joursRestants = $derived(Math.ceil((dateFinObjectif.getTime() - aujourdhui.getTime()) / (1000 * 60 * 60 * 24)));
+  const kamasParJour = $derived(joursRestants > 0 ? Math.ceil(restantPourObjectif / joursRestants) : 0);
 
   // ROI moyen
-  $: roiMoyen = totalDepense > 0 ? ((gainReel / totalDepense) * 100) : 0;
+  const roiMoyen = $derived(totalDepense > 0 ? ((gainReel / totalDepense) * 100) : 0);
 
   // Gain moyen par vente
-  $: gainMoyenParVente = itemsVendus > 0 ? gainReel / itemsVendus : 0;
+  const gainMoyenParVente = $derived(itemsVendus > 0 ? gainReel / itemsVendus : 0);
 
   // Temps moyen de vente (en jours)
-  $: tempsMoyenVente = (() => {
+  const tempsMoyenVente = $derived.by(() => {
     const ventesAvecTemps = data.items.filter(item => item.statusVente && item.soldAt);
     if (ventesAvecTemps.length === 0) return 0;
 
@@ -102,18 +102,22 @@
     }, 0);
 
     return totalJours / ventesAvecTemps.length;
-  })();
+  });
 
   // Top 5 meilleures ventes
-  $: topVentes = [...data.items]
+  const topVentes = $derived([...data.items]
     .filter(item => item.statusVente)
     .sort((a, b) => b.benefit - a.benefit)
-    .slice(0, 5);
+    .slice(0, 5));
 
   function formatNumber(num: number): string {
     return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, "  ");
   }
 </script>
+
+<svelte:head>
+  <title>Otomaï - Ventes</title>
+</svelte:head>
 
 <div class="flex w-full flex-col gap-4">
   <HeaderItem />
