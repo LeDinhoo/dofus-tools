@@ -12,8 +12,8 @@
 		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
 		"ship": "./deploy.sh",
 		"ship:tag": "./deploy.sh",
-		"docker:build": "docker build -t ghcr.io/ledinhoo/dofus-tools/dftools:latest .",
-		"docker:push": "docker push ghcr.io/ledinhoo/dofus-tools/dftools:latest"
+		"docker:build": "docker buildx build --platform linux/amd64,linux/arm64 -t ghcr.io/ledinhoo/dofus-tools/dftools:latest .",
+		"docker:push": "docker buildx build --platform linux/amd64,linux/arm64 -t ghcr.io/ledinhoo/dofus-tools/dftools:latest --push ."
 	},
 	"devDependencies": {
 		"@internationalized/date": "^3.10.1",

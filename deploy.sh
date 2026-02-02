@@ -10,25 +10,27 @@ TIMESTAMP=$(date +%Y%m%d-%H%M%S)
 # Vérifier si on veut un tag spécifique ou latest
 TAG="${1:-latest}"
 
-echo "📦 Building l'image Docker..."
-docker build -t ${IMAGE_NAME}:${TAG} .
+echo "🔧 Création du builder multi-plateforme si nécessaire..."
+docker buildx create --name multiplatform --use 2>/dev/null || docker buildx use multiplatform
 
-# Si c'est un tag custom, on tag aussi en latest
+echo "📦 Building l'image Docker pour linux/amd64 et linux/arm64..."
 if [ "$TAG" != "latest" ]; then
-    echo "🏷️  Tagging aussi en latest..."
-    docker tag ${IMAGE_NAME}:${TAG} ${IMAGE_NAME}:latest
+    echo "🏷️  Building avec tag ${TAG} et latest..."
+    docker buildx build \
+        --platform linux/amd64,linux/arm64 \
+        -t ${IMAGE_NAME}:${TAG} \
+        -t ${IMAGE_NAME}:latest \
+        --push \
+        .
+else
+    docker buildx build \
+        --platform linux/amd64,linux/arm64 \
+        -t ${IMAGE_NAME}:${TAG} \
+        --push \
+        .
 fi
 
-echo "🔐 Vérification de l'authentification GitHub Container Registry..."
-# Note: Il faut être connecté avec: docker login ghcr.io -u USERNAME
-# avec un Personal Access Token (PAT) avec les permissions packages
-
-echo "📤 Push de l'image vers GitHub Container Registry..."
-docker push ${IMAGE_NAME}:${TAG}
-
-if [ "$TAG" != "latest" ]; then
-    docker push ${IMAGE_NAME}:latest
-fi
+echo "🔐 Note: Assurez-vous d'être connecté avec: docker login ghcr.io -u USERNAME"
 
 echo ""
 echo "✅ Déploiement terminé avec succès!"
