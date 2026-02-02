@@ -1,37 +1,59 @@
 import { auth } from "../src/lib/server/auth"; // path to your auth file
-import { svelteKitHandler } from "better-auth/svelte-kit";
 import { building } from "$app/environment";
 import { redirect, type Handle } from "@sveltejs/kit";
-import { sequence } from "@sveltejs/kit/hooks";
 
-// Premier handle : Better Auth peuple event.locals
-const authHandle: Handle = async ({ event, resolve }) => {
-  return svelteKitHandler({ event, resolve, auth, building });
-};
-
-// Deuxième handle : Protection des routes
-const protectionHandle: Handle = async ({ event, resolve }) => {
-  // Protection des routes (sauf pendant le build)
+export const handle: Handle = async ({ event, resolve }) => {
+  // Vérifier la session manuellement avec Better Auth
   if (!building) {
-    const session = event.locals.session;
-    const user = event.locals.user;
     const pathname = event.url.pathname;
 
-    // Debug logs
-    console.log('Protection check:', {
+    // Récupérer le token de session depuis les cookies
+    const sessionToken = event.cookies.get("better-auth.session_token");
+
+    console.log('Session check:', {
       pathname,
-      hasSession: !!session,
-      hasUser: !!user,
-      sessionData: session ? 'exists' : 'null',
-      userData: user ? 'exists' : 'null'
+      hasSessionToken: !!sessionToken,
+      cookieValue: sessionToken ? 'exists' : 'null'
     });
+
+    let session = null;
+    let user = null;
+
+    // Si on a un token, vérifier la session avec Better Auth
+    if (sessionToken) {
+      try {
+        const sessionData = await auth.api.getSession({
+          headers: event.request.headers,
+        });
+
+        session = sessionData?.session || null;
+        user = sessionData?.user || null;
+
+        console.log('After auth check:', {
+          hasSession: !!session,
+          hasUser: !!user
+        });
+      } catch (error) {
+        console.error('Error checking session:', error);
+      }
+    }
+
+    // Peupler event.locals
+    event.locals.session = session;
+    event.locals.user = user;
 
     // Routes publiques (pas besoin d'être connecté)
     const publicRoutes = ['/login', '/api'];
     const isPublicRoute = publicRoutes.some(route => pathname.startsWith(route));
 
-    // Vérifier si l'utilisateur est connecté (session OU user)
+    // Vérifier si l'utilisateur est connecté
     const isAuthenticated = !!(session || user);
+
+    console.log('Protection decision:', {
+      isAuthenticated,
+      isPublicRoute,
+      willRedirect: !isAuthenticated && !isPublicRoute
+    });
 
     // Si l'utilisateur n'est pas connecté et essaie d'accéder à une route protégée
     if (!isAuthenticated && !isPublicRoute) {
@@ -48,6 +70,3 @@ const protectionHandle: Handle = async ({ event, resolve }) => {
 
   return resolve(event);
 };
-
-// Enchaîne les deux handles
-export const handle = sequence(authHandle, protectionHandle);
