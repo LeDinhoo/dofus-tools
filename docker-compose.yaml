@@ -10,6 +10,7 @@ services:
       - db_data:/var/lib/postgresql/data
 
   app:
+    image: ghcr.io/ledinhoo/dofus-tools/dftools:latest
     build: .
     depends_on:
       - db
