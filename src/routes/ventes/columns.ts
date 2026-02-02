@@ -43,6 +43,7 @@ export type Item = {
   benefit: number;
   statusVente: boolean;
   createdAt: Date;
+  soldAt: Date | null; // Date de vente (null si pas encore vendu)
   imageUrl?: string | null;
   type?: string | null;
   superType?: string | null;
@@ -243,6 +244,98 @@ export const columns: ColumnDef<Item>[] = [
       );
 
       return renderSnippet(snippet, { b: benefit, f: formatted });
+    },
+  },
+  {
+    accessorKey: "createdAt",
+    header: "Date d'ajout",
+    cell: ({ row }) => {
+      const date = new Date(row.original.createdAt);
+      const formatted = date.toLocaleDateString("fr-FR", {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+      });
+
+      const snippet = createRawSnippet<[{ date: string }]>((getData) => {
+        const { date } = getData();
+        return {
+          render: () => `<div class="text-sm text-gray-600">${date}</div>`,
+        };
+      });
+
+      return renderSnippet(snippet, { date: formatted });
+    },
+  },
+  {
+    accessorKey: "soldAt",
+    header: "Date de vente",
+    cell: ({ row }) => {
+      const soldAt = row.original.soldAt;
+
+      if (!soldAt) {
+        const snippet = createRawSnippet<[]>(() => {
+          return {
+            render: () => `<div class="text-sm text-gray-400">-</div>`,
+          };
+        });
+        return renderSnippet(snippet, {});
+      }
+
+      const date = new Date(soldAt);
+      const formatted = date.toLocaleDateString("fr-FR", {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+      });
+
+      const snippet = createRawSnippet<[{ date: string }]>((getData) => {
+        const { date } = getData();
+        return {
+          render: () => `<div class="text-sm text-emerald-600 font-medium">${date}</div>`,
+        };
+      });
+
+      return renderSnippet(snippet, { date: formatted });
+    },
+  },
+  {
+    accessorKey: "tempsVente",
+    header: "Temps de vente",
+    cell: ({ row }) => {
+      const soldAt = row.original.soldAt;
+      const createdAt = row.original.createdAt;
+
+      if (!soldAt) {
+        const snippet = createRawSnippet<[]>(() => {
+          return {
+            render: () => `<div class="text-sm text-gray-400">En cours...</div>`,
+          };
+        });
+        return renderSnippet(snippet, {});
+      }
+
+      const start = new Date(createdAt);
+      const end = new Date(soldAt);
+      const diffMs = end.getTime() - start.getTime();
+      const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+      const diffHours = Math.floor((diffMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+
+      let displayText = "";
+      if (diffDays > 0) {
+        displayText = `${diffDays}j ${diffHours}h`;
+      } else {
+        displayText = `${diffHours}h`;
+      }
+
+      const snippet = createRawSnippet<[{ time: string }]>((getData) => {
+        const { time } = getData();
+        return {
+          render: () => `<div class="text-sm text-blue-600 font-medium">${time}</div>`,
+        };
+      });
+
+      return renderSnippet(snippet, { time: displayText });
     },
   },
   {

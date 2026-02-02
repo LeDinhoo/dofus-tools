@@ -87,7 +87,10 @@ export const actions = {
     try {
       await prisma.item.update({
         where: { id: parseInt(idStr) },
-        data: { statusVente: true }, // On passe le statut à Vrai
+        data: {
+          statusVente: true, // On passe le statut à Vrai
+          soldAt: new Date() // On enregistre la date de vente
+        },
       });
     } catch (err) {
       return fail(500, { message: "Erreur lors de la vente" });
@@ -106,7 +109,10 @@ export const actions = {
     try {
       await prisma.item.update({
         where: { id: parseInt(idStr) },
-        data: { statusVente: false }, // On repasse le statut à FAUX
+        data: {
+          statusVente: false, // On repasse le statut à FAUX
+          soldAt: null // On supprime la date de vente
+        },
       });
     } catch (err) {
       return fail(500, { message: "Erreur lors de la réinitialisation" });
