@@ -126,6 +126,53 @@ export const columns: ColumnDef<Item>[] = [
       });
     },
   },
+  // --- PRIX PROPOSÉ (ROI 30%) ---
+  {
+    accessorKey: "prixPropose",
+    header: "Prix Proposé",
+    cell: ({ row }) => {
+      const prixAchat = row.original.prixAchat;
+      const size = row.original.size;
+
+      // Calcul du prix proposé avec ROI de 30%
+      const prixPropose = Math.round(prixAchat * 1.3);
+      const formattedTotal = formatNumber(prixPropose);
+
+      let formattedUnit = "";
+      if (size > 1) {
+        const unitPrice = Math.round(prixPropose / size);
+        formattedUnit = formatNumber(unitPrice);
+      }
+
+      const snippet = createRawSnippet<
+        [{ total: string; unitPrice: string; size: number }]
+      >((getData) => {
+        const { total, unitPrice, size } = getData();
+
+        const unitHtml =
+          size > 1
+            ? `<div class="text-xs text-gray-500 font-normal mt-0.5">Unité : ${unitPrice}</div>`
+            : "";
+
+        return {
+          render: () =>
+            `<div class="flex flex-col">
+                            <div class="text-amber-600 font-medium flex flex-row items-center gap-1">
+                                ${total} <img class="size-3.5" src="/Kama.png" alt="Kama">
+                                <span class="text-xs text-gray-500 ml-1">(+30%)</span>
+                            </div>
+                            ${unitHtml}
+                        </div>`,
+        };
+      });
+
+      return renderSnippet(snippet, {
+        total: formattedTotal,
+        unitPrice: formattedUnit,
+        size,
+      });
+    },
+  },
   // --- MODIFICATION PRIX VENTE ---
   {
     accessorKey: "prixVente",
