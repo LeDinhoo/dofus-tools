@@ -32,7 +32,7 @@
       <div class="text-sm font-medium text-muted-foreground mb-1">Total Dépensé</div>
       <div class="text-xl font-bold text-red-500 flex items-center gap-2">
         {formatNumber(totalDepense)}
-        <img class="size-3" src="/Kama.png" alt="Kama">
+        <img class="size-4" src="/Kama.png" alt="Kama">
       </div>
     </div>
 
@@ -40,7 +40,7 @@
       <div class="text-sm font-medium text-muted-foreground mb-1">Gain Potentiel</div>
       <div class="text-xl font-bold text-amber-600 flex items-center gap-2">
         {formatNumber(gainPotentiel)}
-        <img class="size-3" src="/Kama.png" alt="Kama">
+        <img class="size-4" src="/Kama.png" alt="Kama">
       </div>
     </div>
 
@@ -48,7 +48,7 @@
       <div class="text-sm font-medium text-muted-foreground mb-1">Gain Réel</div>
       <div class="text-xl font-bold text-emerald-600 flex items-center gap-2">
         {formatNumber(gainReel)}
-        <img class="size-3" src="/Kama.png" alt="Kama">
+        <img class="size-4" src="/Kama.png" alt="Kama">
       </div>
     </div>
   </div>
