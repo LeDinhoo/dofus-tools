@@ -19,8 +19,24 @@ model User {
   updatedAt     DateTime
   sessions      Session[]
   accounts      Account[]
+  equipments    Equipment[]
 
   @@map("user")
+}
+
+model Equipment {
+  id        Int      @id @default(autoincrement())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  slot      String   // "left-0", "right-2", "bottom-5", etc.
+  itemData  Json     // Les données de l'item DofusDB
+  price     Int      @default(0)
+  bought    Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, slot])
+  @@map("equipment")
 }
 
 model Session {

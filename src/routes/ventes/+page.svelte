@@ -36,36 +36,60 @@
   let equipmentPrices = $state<Record<string, number>>({});
   // Stockage du statut acheté/non acheté pour chaque slot
   let equipmentBought = $state<Record<string, boolean>>({});
+  // État de chargement des équipements
+  let equipmentLoading = $state(true);
 
-  // Charger les équipements depuis localStorage
+  // Charger les équipements depuis l'API
   $effect(() => {
     if (browser) {
-      const saved = localStorage.getItem('dofus-equipement');
-      if (saved) {
-        equippedItems = JSON.parse(saved);
-      }
-      const savedPrices = localStorage.getItem('dofus-equipement-prices');
-      if (savedPrices) {
-        equipmentPrices = JSON.parse(savedPrices);
-      }
-      const savedBought = localStorage.getItem('dofus-equipement-bought');
-      if (savedBought) {
-        equipmentBought = JSON.parse(savedBought);
-      }
+      loadEquipmentFromDB();
     }
   });
 
-  // Sauvegarder les équipements dans localStorage
-  function saveEquipment() {
-    if (browser) {
-      localStorage.setItem('dofus-equipement', JSON.stringify(equippedItems));
+  async function loadEquipmentFromDB() {
+    try {
+      const response = await fetch('/api/equipment');
+      if (response.ok) {
+        const data = await response.json();
+        equippedItems = data.equippedItems || {};
+        equipmentPrices = data.equipmentPrices || {};
+        equipmentBought = data.equipmentBought || {};
+      }
+    } catch (e) {
+      console.error('Erreur chargement équipements:', e);
+    } finally {
+      equipmentLoading = false;
     }
   }
 
-  // Sauvegarder les prix dans localStorage
-  function savePrices() {
-    if (browser) {
-      localStorage.setItem('dofus-equipement-prices', JSON.stringify(equipmentPrices));
+  // Sauvegarder un équipement dans la DB
+  async function saveEquipmentSlot(slot: string, itemData: any, price?: number, bought?: boolean) {
+    try {
+      await fetch('/api/equipment', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          slot,
+          itemData,
+          price: price ?? equipmentPrices[slot] ?? 0,
+          bought: bought ?? equipmentBought[slot] ?? false
+        }),
+      });
+    } catch (e) {
+      console.error('Erreur sauvegarde équipement:', e);
+    }
+  }
+
+  // Mettre à jour prix ou statut acheté
+  async function updateEquipmentSlot(slot: string, price?: number, bought?: boolean) {
+    try {
+      await fetch('/api/equipment', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ slot, price, bought }),
+      });
+    } catch (e) {
+      console.error('Erreur mise à jour équipement:', e);
     }
   }
 
@@ -73,25 +97,18 @@
     const key = `${type}-${index}`;
     equipmentPrices[key] = price;
     equipmentPrices = { ...equipmentPrices };
-    savePrices();
+    updateEquipmentSlot(key, price, undefined);
   }
 
   function getPrice(type: string, index: number): number {
     return equipmentPrices[`${type}-${index}`] || 0;
   }
 
-  // Sauvegarder le statut acheté dans localStorage
-  function saveBought() {
-    if (browser) {
-      localStorage.setItem('dofus-equipement-bought', JSON.stringify(equipmentBought));
-    }
-  }
-
   function toggleBought(type: string, index: number) {
     const key = `${type}-${index}`;
     equipmentBought[key] = !equipmentBought[key];
     equipmentBought = { ...equipmentBought };
-    saveBought();
+    updateEquipmentSlot(key, undefined, equipmentBought[key]);
   }
 
   function isBought(type: string, index: number): boolean {
@@ -194,7 +211,8 @@
     if (selectedItem && selectedSlotType !== null && selectedSlotIndex !== null) {
       const key = `${selectedSlotType}-${selectedSlotIndex}`;
       equippedItems[key] = selectedItem;
-      saveEquipment();
+      equippedItems = { ...equippedItems };
+      saveEquipmentSlot(key, selectedItem);
       slotDialogOpen = false;
     }
   }
@@ -203,15 +221,12 @@
     const key = `${type}-${index}`;
     delete equippedItems[key];
     equippedItems = { ...equippedItems };
-    saveEquipment();
-    // Supprimer aussi le prix associé
     delete equipmentPrices[key];
     equipmentPrices = { ...equipmentPrices };
-    savePrices();
-    // Supprimer aussi le statut acheté
     delete equipmentBought[key];
     equipmentBought = { ...equipmentBought };
-    saveBought();
+    // Supprimer de la DB (itemData = null)
+    saveEquipmentSlot(key, null);
   }
 
   function getEquippedItem(type: string, index: number) {
@@ -353,24 +368,24 @@
           ...Array(6).fill(null).map((_, i) => ({ type: 'bottom', index: i }))
         ];
 
-        // Vider les équipements existants
+        // Vider les équipements existants (en DB)
+        await fetch('/api/equipment', { method: 'DELETE' });
+
+        // Vider localement
         equippedItems = {};
         equipmentPrices = {};
         equipmentBought = {};
 
-        // Assigner les items aux slots
-        data.items.forEach((item: any, index: number) => {
-          if (index < slots.length) {
-            const slot = slots[index];
-            const key = `${slot.type}-${slot.index}`;
-            equippedItems[key] = item;
-          }
-        });
+        // Assigner les items aux slots et sauvegarder en DB
+        for (let index = 0; index < data.items.length && index < slots.length; index++) {
+          const item = data.items[index];
+          const slot = slots[index];
+          const key = `${slot.type}-${slot.index}`;
+          equippedItems[key] = item;
+          await saveEquipmentSlot(key, item, 0, false);
+        }
 
-        // Sauvegarder
-        saveEquipment();
-        savePrices();
-        saveBought();
+        equippedItems = { ...equippedItems };
 
         // Fermer seulement si tous les items ont été trouvés
         if (importNotFound.length === 0) {
