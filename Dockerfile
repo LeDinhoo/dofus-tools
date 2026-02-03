@@ -1,4 +1,4 @@
-FROM node:25-alpine3.22 AS builder
+FROM node:22-bookworm-slim AS builder
 RUN npm install -g pnpm
 WORKDIR /app
 
@@ -17,7 +17,27 @@ ENV DATABASE_URL="postgresql://user:pass@localhost:5432/db"
 
 RUN pnpm svelte-kit sync && npx prisma generate && pnpm run build
 
-FROM node:25-alpine3.22
+FROM node:22-bookworm-slim
+RUN npm install -g pnpm
+
+# Dépendances système pour Playwright/Chromium
+RUN apt-get update && apt-get install -y \
+    libnss3 \
+    libatk1.0-0 \
+    libatk-bridge2.0-0 \
+    libcups2 \
+    libdrm2 \
+    libxkbcommon0 \
+    libxcomposite1 \
+    libxdamage1 \
+    libxrandr2 \
+    libgbm1 \
+    libasound2 \
+    libpango-1.0-0 \
+    libcairo2 \
+    libxshmfence1 \
+    && rm -rf /var/lib/apt/lists/*
+
 WORKDIR /app
 COPY --from=builder /app/build ./build
 COPY --from=builder /app/node_modules ./node_modules
@@ -25,6 +45,9 @@ COPY --from=builder /app/package.json ./package.json
 COPY --from=builder /app/prisma ./prisma
 COPY --from=builder /app/prisma.config.ts ./prisma.config.ts
 COPY docker-entrypoint.sh ./
+
+# Installer Chromium pour Playwright
+RUN npx playwright install chromium
 
 RUN chmod +x docker-entrypoint.sh
 
