@@ -17,10 +17,7 @@
 
   const sidebar = useSidebar();
   let isHovered = $state(false);
-
-  $inspect(sidebar.open);
-  $inspect(isHovered);
-
+  
   function handleHover() {
     isHovered = true;
   }
@@ -31,26 +28,26 @@
 
   // Menu items.
   const items = [
-    {
-      title: "Almanax",
-      url: "#",
-      icon: CalendarIcon,
-    },
-    {
-      title: "Martin",
-      url: "/koli",
-      icon: DuelSwords,
-    },
+    // {
+    //   title: "Almanax",
+    //   url: "#",
+    //   icon: CalendarIcon,
+    // },
+    // {
+    //   title: "Martin",
+    //   url: "/koli",
+    //   icon: DuelSwords,
+    // },
     {
       title: "Ventes", // <-- Item ajouté
       url: "/ventes", // <-- Route ajoutée
       icon: DollarIcon, // <-- Icône ajoutée
     },
-    {
-      title: "Forgemagie", // <-- Item ajouté
-      url: "/forgemagie", // <-- Route ajoutée
-      icon: Wand, // <-- Icône ajoutée
-    },
+    // {
+    //   title: "Forgemagie", // <-- Item ajouté
+    //   url: "/forgemagie", // <-- Route ajoutée
+    //   icon: Wand, // <-- Icône ajoutée
+    // },
   ];
 </script>
 

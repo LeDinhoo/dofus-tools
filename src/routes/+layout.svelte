@@ -13,7 +13,7 @@
 </svelte:head>
 
 <Toaster />
-<Sidebar.Provider>
+<Sidebar.Provider open={false}>
   <AppSidebar />
   <main class="w-full pl-4 pr-12 pt-8">
     {@render children?.()}
