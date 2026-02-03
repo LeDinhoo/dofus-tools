@@ -882,13 +882,16 @@ export const ItemScalarFieldEnum = {
   prixVente: 'prixVente',
   benefit: 'benefit',
   createdAt: 'createdAt',
+  soldAt: 'soldAt',
   statusVente: 'statusVente',
   category: 'category',
   imageUrl: 'imageUrl',
   type: 'type',
   superType: 'superType',
   unit: 'unit',
-  size: 'size'
+  size: 'size',
+  kamasAvant: 'kamasAvant',
+  kamasApres: 'kamasApres'
 } as const
 
 export type ItemScalarFieldEnum = (typeof ItemScalarFieldEnum)[keyof typeof ItemScalarFieldEnum]

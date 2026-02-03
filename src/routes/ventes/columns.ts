@@ -4,6 +4,7 @@ import { renderSnippet } from "$lib/components/ui/data-table/index.js";
 import { renderComponent } from "$lib/components/ui/data-table/index.js";
 import ActionCell from "$lib/components/ui/data-table/ActionCell.svelte";
 import ModifyButton from "$lib/components/ModifyButton.svelte";
+import EditablePriceCell from "$lib/components/EditablePriceCell.svelte";
 
 /**
  * Formate un nombre en insérant un séparateur de milliers personnalisé.
@@ -156,49 +157,15 @@ export const columns: ColumnDef<Item>[] = [
       });
     },
   },
-  // --- MODIFICATION PRIX VENTE ---
+  // --- MODIFICATION PRIX VENTE (éditable inline) ---
   {
     accessorKey: "prixVente",
     header: "Prix de Vente",
     cell: ({ row }) => {
-      const price = row.original.prixVente;
-      const size = row.original.size;
-
-      // Gestion du cas où le prix est null
-      const formattedTotal = price !== null ? formatNumber(price) : "-";
-
-      let formattedUnit = "";
-      if (price !== null && size > 1) {
-        const unitPrice = Math.round(price / size);
-        formattedUnit = formatNumber(unitPrice);
-      }
-
-      const snippet = createRawSnippet<
-        [{ total: string; unitPrice: string; size: number; hasPrice: boolean }]
-      >((getData) => {
-        const { total, unitPrice, size, hasPrice } = getData();
-
-        const unitHtml =
-          hasPrice && size > 1
-            ? `<div class="text-xs text-gray-500 font-normal mt-0.5">Unité : ${unitPrice}</div>`
-            : "";
-
-        return {
-          render: () =>
-            `<div class="flex flex-col">
-                            <div class="text-emerald-600 font-medium flex flex-row items-center gap-1">
-                                ${total} <img class="size-3.5" src="/Kama.png" alt="Kama">
-                            </div>
-                            ${unitHtml}
-                        </div>`,
-        };
-      });
-
-      return renderSnippet(snippet, {
-        total: formattedTotal,
-        unitPrice: formattedUnit,
-        size,
-        hasPrice: price !== null,
+      return renderComponent(EditablePriceCell, {
+        id: row.original.id,
+        price: row.original.prixVente,
+        size: row.original.size,
       });
     },
   },

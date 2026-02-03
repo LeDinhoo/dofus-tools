@@ -13,18 +13,18 @@ TAG="${1:-latest}"
 echo "🔧 Création du builder multi-plateforme si nécessaire..."
 docker buildx create --name multiplatform --use 2>/dev/null || docker buildx use multiplatform
 
-echo "📦 Building l'image Docker pour linux/amd64 et linux/arm64..."
+echo "📦 Building l'image Docker pour linux/amd64..."
 if [ "$TAG" != "latest" ]; then
     echo "🏷️  Building avec tag ${TAG} et latest..."
     docker buildx build \
-        --platform linux/amd64,linux/arm64 \
+        --platform linux/amd64 \
         -t ${IMAGE_NAME}:${TAG} \
         -t ${IMAGE_NAME}:latest \
         --push \
         .
 else
     docker buildx build \
-        --platform linux/amd64,linux/arm64 \
+        --platform linux/amd64 \
         -t ${IMAGE_NAME}:${TAG} \
         --push \
         .
