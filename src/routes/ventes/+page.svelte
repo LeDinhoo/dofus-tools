@@ -12,7 +12,7 @@
   import * as Dialog from "$lib/components/ui/dialog/index.js";
   import { browser } from "$app/environment";
   import SearchInput from "$lib/components/ui/search/SearchInput.svelte";
-  import { Check, ShoppingCart } from "@lucide/svelte";
+  import { Check, ShoppingCart, Download, Loader2 } from "@lucide/svelte";
 
   let { data } = $props();
 
@@ -25,6 +25,13 @@
 
   // Stockage des items équipés (16 slots: 5 gauche + 5 droite + 6 bas)
   let equippedItems = $state<Record<string, any>>({});
+
+  // Import DofusBook
+  let showImportDialog = $state(false);
+  let importUrl = $state('');
+  let importLoading = $state(false);
+  let importError = $state('');
+  let importNotFound = $state<string[]>([]);
   // Stockage des prix pour chaque slot
   let equipmentPrices = $state<Record<string, number>>({});
   // Stockage du statut acheté/non acheté pour chaque slot
@@ -310,6 +317,73 @@
   function formatNumber(num: number): string {
     return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, "  ");
   }
+
+  // Import depuis DofusBook
+  async function importFromDofusBook() {
+    if (!importUrl.trim()) return;
+
+    importLoading = true;
+    importError = '';
+    importNotFound = [];
+
+    try {
+      const response = await fetch('/api/import-dofusbook', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ url: importUrl })
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Erreur lors de l\'import');
+      }
+
+      // Stocker les items non trouvés
+      if (data.notFound && data.notFound.length > 0) {
+        importNotFound = data.notFound;
+      }
+
+      if (data.items && data.items.length > 0) {
+        // Mapper les items aux slots
+        // Ordre: left 0-4, right 0-4, bottom 0-5
+        const slots = [
+          ...Array(5).fill(null).map((_, i) => ({ type: 'left', index: i })),
+          ...Array(5).fill(null).map((_, i) => ({ type: 'right', index: i })),
+          ...Array(6).fill(null).map((_, i) => ({ type: 'bottom', index: i }))
+        ];
+
+        // Vider les équipements existants
+        equippedItems = {};
+        equipmentPrices = {};
+        equipmentBought = {};
+
+        // Assigner les items aux slots
+        data.items.forEach((item: any, index: number) => {
+          if (index < slots.length) {
+            const slot = slots[index];
+            const key = `${slot.type}-${slot.index}`;
+            equippedItems[key] = item;
+          }
+        });
+
+        // Sauvegarder
+        saveEquipment();
+        savePrices();
+        saveBought();
+
+        // Fermer seulement si tous les items ont été trouvés
+        if (importNotFound.length === 0) {
+          showImportDialog = false;
+          importUrl = '';
+        }
+      }
+    } catch (e) {
+      importError = e instanceof Error ? e.message : 'Erreur inconnue';
+    } finally {
+      importLoading = false;
+    }
+  }
 </script>
 
 <svelte:head>
@@ -363,10 +437,16 @@
     <!-- Onglet Equipement -->
     <Tabs.Content value="equipement" class="py-4">
       <div class="flex flex-col items-center gap-4">
-        <!-- Total -->
-        <div class="flex items-center gap-2 text-lg font-bold">
-          Total: {formatNumber(totalEquipmentPrice())}
-          <img class="size-5" src="/Kama.png" alt="Kama">
+        <!-- Header avec Total et bouton Import -->
+        <div class="flex items-center gap-4">
+          <div class="flex items-center gap-2 text-lg font-bold">
+            Total: {formatNumber(totalEquipmentPrice())}
+            <img class="size-5" src="/Kama.png" alt="Kama">
+          </div>
+          <Button variant="outline" size="sm" onclick={() => showImportDialog = true}>
+            <Download class="size-4 mr-2" />
+            Importer
+          </Button>
         </div>
 
         <div class="flex items-center gap-4">
@@ -525,6 +605,58 @@
           <Button onclick={confirmEquipItem} disabled={!selectedItem}>
             Équiper
           </Button>
+        </Dialog.Footer>
+      </Dialog.Content>
+    </Dialog.Root>
+
+    <!-- Dialog pour importer depuis DofusBook -->
+    <Dialog.Root bind:open={showImportDialog}>
+      <Dialog.Content class="sm:max-w-[500px]">
+        <Dialog.Header>
+          <Dialog.Title>Importer depuis DofusBook</Dialog.Title>
+          <Dialog.Description>
+            Collez un lien DofusBook (d-bk.net ou dofusbook.net) pour importer tous les équipements
+          </Dialog.Description>
+        </Dialog.Header>
+        <div class="py-4 space-y-4">
+          <div class="grid gap-2">
+            <Label for="dofusbook-url">Lien DofusBook</Label>
+            <Input
+              id="dofusbook-url"
+              type="text"
+              bind:value={importUrl}
+              placeholder="https://d-bk.net/fr/d/xxxxx"
+              disabled={importLoading}
+            />
+          </div>
+          {#if importError}
+            <p class="text-sm text-destructive">{importError}</p>
+          {/if}
+          {#if importNotFound.length > 0}
+            <div class="p-3 rounded-lg bg-amber-500/10 border border-amber-500/30">
+              <p class="text-sm font-medium text-amber-600 mb-2">⚠️ {importNotFound.length} item(s) non trouvé(s) sur DofusDB :</p>
+              <ul class="text-sm text-amber-600/80 list-disc list-inside">
+                {#each importNotFound as itemName}
+                  <li>{itemName}</li>
+                {/each}
+              </ul>
+            </div>
+          {/if}
+        </div>
+        <Dialog.Footer>
+          <Button variant="outline" onclick={() => { showImportDialog = false; importError = ''; importNotFound = []; importUrl = ''; }} disabled={importLoading}>
+            {importNotFound.length > 0 ? 'Fermer' : 'Annuler'}
+          </Button>
+          {#if importNotFound.length === 0}
+            <Button onclick={importFromDofusBook} disabled={importLoading || !importUrl.trim()}>
+              {#if importLoading}
+                <Loader2 class="size-4 mr-2 animate-spin" />
+                Import en cours...
+              {:else}
+                Importer
+              {/if}
+            </Button>
+          {/if}
         </Dialog.Footer>
       </Dialog.Content>
     </Dialog.Root>
