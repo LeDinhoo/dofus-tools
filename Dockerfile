@@ -1,11 +1,18 @@
+# syntax=docker/dockerfile:1.4
 FROM node:22-bookworm-slim AS builder
-RUN npm install -g pnpm
+
+# Installer pnpm via corepack (plus rapide)
+RUN corepack enable && corepack prepare pnpm@latest --activate
+
 WORKDIR /app
 
+# Copier uniquement les fichiers de dépendances d'abord (meilleur cache)
 COPY pnpm-lock.yaml package.json ./
 COPY prisma ./prisma/
 
-RUN pnpm install --frozen-lockfile
+# Installer avec cache mount (réutilise le cache pnpm entre builds)
+RUN --mount=type=cache,id=pnpm,target=/root/.local/share/pnpm/store \
+    pnpm install --frozen-lockfile
 
 COPY . .
 
@@ -15,24 +22,25 @@ ENV PUBLIC_BETTER_AUTH_URL="http://localhost:3000"
 ENV DB_URL="postgresql://user:pass@localhost:5432/db"
 ENV DATABASE_URL="postgresql://user:pass@localhost:5432/db"
 
-RUN pnpm svelte-kit sync && npx prisma generate && pnpm run build
+RUN pnpm svelte-kit sync && npx prisma generate && pnpm run build:raw
 
-FROM node:22-bookworm-slim
-RUN npm install -g pnpm
+# Stage final
+FROM node:22-bookworm-slim AS runtime
 
-# Installer toutes les dépendances système pour Playwright/Chromium
-RUN npx playwright install-deps chromium
+RUN corepack enable && corepack prepare pnpm@latest --activate
+
+# Installer dépendances Playwright en une seule commande
+RUN npx playwright install-deps chromium && npx playwright install chromium
 
 WORKDIR /app
+
+# Copier les fichiers nécessaires
 COPY --from=builder /app/build ./build
-COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/package.json ./package.json
+COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/prisma ./prisma
 COPY --from=builder /app/prisma.config.ts ./prisma.config.ts
 COPY docker-entrypoint.sh ./
-
-# Installer Chromium pour Playwright
-RUN npx playwright install chromium
 
 RUN chmod +x docker-entrypoint.sh
 
