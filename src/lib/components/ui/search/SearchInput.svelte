@@ -67,7 +67,7 @@
 	});
 </script>
 
-<div class="relative w-[400px]">
+<div class="relative w-full sm:w-[280px]">
 	{#if selectedItem}
 		<div class="flex w-full items-center">
 			<Badge variant="outline" class="flex h-9 w-full items-center justify-between px-3">

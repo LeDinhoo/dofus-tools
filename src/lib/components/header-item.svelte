@@ -51,47 +51,44 @@
   }
 </script>
 
-<div
-  class="flex flex-row items-center justify-center gap-4 p-4 bg-muted rounded-lg border"
+<form
+  action="?/createItem"
+  method="POST"
+  class="flex flex-col gap-3 p-4 bg-muted rounded-lg border"
+  use:enhance={({ formData }) => {
+    handleSubmit({ formData });
+  }}
 >
-  <form
-    action="?/createItem"
-    method="POST"
-    class="flex w-full items-center justify-between gap-4"
-    use:enhance={({ formData }) => {
-      handleSubmit({ formData });
-    }}
-  >
-    <div class="flex flex-wrap w-full flex-row gap-4">
-      <SearchInput
-        placeholder="Rechercher un objet"
-        bind:value={name}
-        bind:selectedItem
-      />
+  <!-- Mobile: colonnes empilées | Desktop: tout en ligne avec flex-wrap -->
+  <div class="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
+    <SearchInput
+      placeholder="Rechercher un objet"
+      bind:value={name}
+      bind:selectedItem
+    />
 
-      <CategorySelect bind:value={category} />
+    <CategorySelect bind:value={category} />
+    <UnitSelect bind:value={unit} />
 
-      <Input
-        placeholder="Taille"
-        type="number"
-        bind:value={size}
-        name="size"
-        class="w-[90px]"
-      />
+    <Input
+      placeholder="Taille"
+      type="number"
+      bind:value={size}
+      name="size"
+      class="w-full sm:w-20"
+    />
 
-      <UnitSelect bind:value={unit} />
-
+    <div class="flex gap-2 items-center">
       <Input
         placeholder="Prix d'achat"
         type="number"
         bind:value={purchasePrice}
         name="prixAchat"
-        class="w-[180px]"
+        class="w-full sm:w-32"
       />
-
       <Dialog.Root bind:open={priceDialogOpen}>
         <Dialog.Trigger>
-          <Button variant="outline" size="icon">
+          <Button variant="outline" size="icon" class="shrink-0">
             <Copy />
           </Button>
         </Dialog.Trigger>
@@ -101,41 +98,42 @@
           </Dialog.Header>
         </Dialog.Content>
       </Dialog.Root>
-
-      <Input
-        placeholder="Prix de vente"
-        type="number"
-        bind:value={salePrice}
-        name="prixVente"
-        class="w-[180px]"
-      />
-
-      <Input
-        placeholder="Kamas avant"
-        type="number"
-        bind:value={kamasAvant}
-        name="kamasAvant"
-        class="w-[180px]"
-      />
-
-      <Input
-        placeholder="Kamas après"
-        type="number"
-        bind:value={kamasApres}
-        name="kamasApres"
-        class="w-[180px]"
-      />
-
-      <div class="flex items-center justify-center gap-2">
-        <Switch id="airplane-mode" bind:checked={saleStatus} />
-        <Label for="airplane-mode" class="w-16 justify-self-auto"
-          >{saleStatusLabel}</Label
-        >
-      </div>
     </div>
-    <Button class="cursor-pointer" type="submit" variant="outline">
+
+    <Input
+      placeholder="Prix de vente"
+      type="number"
+      bind:value={salePrice}
+      name="prixVente"
+      class="w-full sm:w-32"
+    />
+
+    <Input
+      placeholder="Kamas avant"
+      type="number"
+      bind:value={kamasAvant}
+      name="kamasAvant"
+      class="w-full sm:w-32"
+    />
+
+    <Input
+      placeholder="Kamas après"
+      type="number"
+      bind:value={kamasApres}
+      name="kamasApres"
+      class="w-full sm:w-32"
+    />
+
+    <div class="flex items-center gap-2">
+      <Switch id="airplane-mode" bind:checked={saleStatus} />
+      <Label for="airplane-mode" class="text-sm whitespace-nowrap">
+        {saleStatusLabel}
+      </Label>
+    </div>
+
+    <Button class="cursor-pointer w-full sm:w-auto" type="submit" variant="outline">
       <Plus />
-      Nouveau
+      <span class="hidden sm:inline">Nouveau</span>
     </Button>
-  </form>
-</div>
+  </div>
+</form>

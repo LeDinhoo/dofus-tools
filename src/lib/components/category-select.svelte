@@ -1,5 +1,6 @@
 <script lang="ts">
   import * as Select from "$lib/components/ui/select/index.js";
+  import { cn } from "$lib/utils.js";
 
   // Voici la liste mise à jour
   const categories = [
@@ -12,16 +13,16 @@
     { value: "ressources", label: "Ressources" },
   ];
 
-  let { value = $bindable() } = $props();
+  let { value = $bindable(), class: className = "" } = $props();
 
   const triggerContent = $derived(
     categories.find((cat) => cat.value === value)?.label ?? "Catégorie"
   );
 </script>
 
-<div class="flex w-[180px]">
+<div class={cn("w-full sm:w-fit", className)}>
   <Select.Root type="single" bind:value>
-    <Select.Trigger class="w-[180px]">
+    <Select.Trigger class="w-full sm:w-[140px]">
       {triggerContent}
     </Select.Trigger>
     <Select.Content>

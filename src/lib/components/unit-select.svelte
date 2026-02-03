@@ -1,5 +1,6 @@
 <script lang="ts">
 	import * as Select from '$lib/components/ui/select/index.js';
+	import { cn } from '$lib/utils.js';
 
 	// Voici la liste mise à jour
 	const units = [
@@ -9,14 +10,14 @@
 		{ value: '1000', label: 'x1000' }
 	];
 
-	let { value = $bindable() } = $props();
+	let { value = $bindable(), class: className = '' } = $props();
 
 	const triggerContent = $derived(units.find((cat) => cat.value === value)?.label ?? 'Unité');
 </script>
 
-<div class="flex w-[90px]">
+<div class={cn('w-full sm:w-fit', className)}>
 	<Select.Root type="single" bind:value>
-		<Select.Trigger class="w-[180px]">
+		<Select.Trigger class="w-full sm:w-[80px]">
 			{triggerContent}
 		</Select.Trigger>
 		<Select.Content>
