@@ -30,7 +30,9 @@ export const POST: RequestHandler = async ({ request }) => {
     const page = await context.newPage();
 
     console.log('Navigation vers:', url);
-    await page.goto(url, { waitUntil: 'networkidle', timeout: 30000 });
+    await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 30000 });
+    // Attendre que les images des items soient chargées
+    await page.waitForSelector('img[src*="/static/dist/items/"]', { timeout: 10000 }).catch(() => {});
 
     // Extraire les noms des items équipés
     const dofusbookItems = await page.evaluate(() => {
