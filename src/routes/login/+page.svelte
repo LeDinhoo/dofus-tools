@@ -1,7 +1,7 @@
 <script lang="ts">
   import { authClient } from "$lib/auth-client";
-  import { goto } from "$app/navigation";
   import { toast } from "svelte-sonner";
+  import { dev } from "$app/environment";
   import * as Card from "$lib/components/ui/card";
   import { Button } from "$lib/components/ui/button";
   import { Input } from "$lib/components/ui/input";
@@ -10,8 +10,8 @@
   let email = "";
   let password = "";
   let name = "";
-  let isLogin = true; // Pour basculer entre login et signup
   let loading = false;
+  let isLogin = true; // Pour basculer entre login et signup (dev uniquement)
 
   async function handleSubmit() {
     loading = true;
@@ -29,7 +29,7 @@
         }
       );
     } else {
-      // SIGNUP
+      // SIGNUP (dev uniquement)
       await authClient.signUp.email(
         { email, password, name },
         {
@@ -41,6 +41,7 @@
         }
       );
     }
+
     loading = false;
   }
 </script>
@@ -48,9 +49,12 @@
 <div class="flex h-screen w-full items-center justify-center px-4">
   <Card.Root class="w-full max-w-md">
     <Card.Header>
-      <Card.Title class="text-2xl"
-        >{isLogin ? "Connexion" : "Créer un compte"}</Card.Title
-      >
+      <Card.Title class="text-2xl">
+        {isLogin ? "Connexion" : "Créer un compte"}
+        {#if dev}
+          <span class="ml-2 text-sm text-orange-500">(Mode Dev)</span>
+        {/if}
+      </Card.Title>
       <Card.Description>
         {isLogin
           ? "Entrez vos identifiants pour accéder à vos outils."
@@ -59,7 +63,7 @@
     </Card.Header>
 
     <Card.Content class="space-y-4">
-      {#if !isLogin}
+      {#if !isLogin && dev}
         <div class="space-y-2">
           <Label for="name">Nom d'utilisateur</Label>
           <Input id="name" bind:value={name} placeholder="Dinho" />
@@ -87,14 +91,16 @@
         {loading ? "Chargement..." : isLogin ? "Se connecter" : "S'inscrire"}
       </Button>
 
-      <button
-        class="text-sm text-muted-foreground hover:underline"
-        onclick={() => (isLogin = !isLogin)}
-      >
-        {isLogin
-          ? "Pas encore de compte ? S'inscrire"
-          : "Déjà un compte ? Se connecter"}
-      </button>
+      {#if dev}
+        <button
+          class="text-sm text-muted-foreground hover:underline"
+          onclick={() => (isLogin = !isLogin)}
+        >
+          {isLogin
+            ? "Pas encore de compte ? S'inscrire"
+            : "Déjà un compte ? Se connecter"}
+        </button>
+      {/if}
     </Card.Footer>
   </Card.Root>
 </div>

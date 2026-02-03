@@ -76,6 +76,7 @@ model Item {
   prixVente   Float?   @default(0)
   benefit     Float    // Attention: champ obligatoire, on le calculera si manquant
   createdAt   DateTime @default(now())
+  soldAt      DateTime? // Date de vente (null si pas encore vendu)
   statusVente Boolean  @default(false)
   category    String   @default("general")
 
@@ -85,4 +86,7 @@ model Item {
 
   unit        Float?
   size        Float?
+
+  kamasAvant  Float?
+  kamasApres  Float?
 }

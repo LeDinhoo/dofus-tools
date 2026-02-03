@@ -4,6 +4,7 @@ import { renderSnippet } from "$lib/components/ui/data-table/index.js";
 import { renderComponent } from "$lib/components/ui/data-table/index.js";
 import ActionCell from "$lib/components/ui/data-table/ActionCell.svelte";
 import ModifyButton from "$lib/components/ModifyButton.svelte";
+import EditablePriceCell from "$lib/components/EditablePriceCell.svelte";
 
 /**
  * Formate un nombre en insérant un séparateur de milliers personnalisé.
@@ -22,16 +23,6 @@ function formatNumber(num: number, separator: string = "  "): string {
   return integerPartFormatted + decimalPart;
 }
 
-const categoryLabels: { [key: string]: string } = {
-  tous: "Tous",
-  ames: "Âmes",
-  equipements: "Équipements",
-  consommables: "Consommables",
-  creatures: "Créatures",
-  cosmetiques: "Cosmétiques",
-  runes: "Runes",
-};
-
 export type Item = {
   id: number;
   nom: string;
@@ -43,6 +34,7 @@ export type Item = {
   benefit: number;
   statusVente: boolean;
   createdAt: Date;
+  soldAt: Date | null; // Date de vente (null si pas encore vendu)
   imageUrl?: string | null;
   type?: string | null;
   superType?: string | null;
@@ -71,14 +63,6 @@ export const columns: ColumnDef<Item>[] = [
       });
 
       return renderSnippet(snippet, { name, img });
-    },
-  },
-  {
-    accessorKey: "category",
-    header: "Catégorie",
-    cell: ({ row }) => {
-      const categoryValue = row.original.category;
-      return categoryLabels[categoryValue] || categoryValue;
     },
   },
   // --- MODIFICATION PRIX ACHAT ---
@@ -173,49 +157,15 @@ export const columns: ColumnDef<Item>[] = [
       });
     },
   },
-  // --- MODIFICATION PRIX VENTE ---
+  // --- MODIFICATION PRIX VENTE (éditable inline) ---
   {
     accessorKey: "prixVente",
     header: "Prix de Vente",
     cell: ({ row }) => {
-      const price = row.original.prixVente;
-      const size = row.original.size;
-
-      // Gestion du cas où le prix est null
-      const formattedTotal = price !== null ? formatNumber(price) : "-";
-
-      let formattedUnit = "";
-      if (price !== null && size > 1) {
-        const unitPrice = Math.round(price / size);
-        formattedUnit = formatNumber(unitPrice);
-      }
-
-      const snippet = createRawSnippet<
-        [{ total: string; unitPrice: string; size: number; hasPrice: boolean }]
-      >((getData) => {
-        const { total, unitPrice, size, hasPrice } = getData();
-
-        const unitHtml =
-          hasPrice && size > 1
-            ? `<div class="text-xs text-gray-500 font-normal mt-0.5">Unité : ${unitPrice}</div>`
-            : "";
-
-        return {
-          render: () =>
-            `<div class="flex flex-col">
-                            <div class="text-emerald-600 font-medium flex flex-row items-center gap-1">
-                                ${total} <img class="size-3.5" src="/Kama.png" alt="Kama">
-                            </div>
-                            ${unitHtml}
-                        </div>`,
-        };
-      });
-
-      return renderSnippet(snippet, {
-        total: formattedTotal,
-        unitPrice: formattedUnit,
-        size,
-        hasPrice: price !== null,
+      return renderComponent(EditablePriceCell, {
+        id: row.original.id,
+        price: row.original.prixVente,
+        size: row.original.size,
       });
     },
   },
@@ -243,6 +193,98 @@ export const columns: ColumnDef<Item>[] = [
       );
 
       return renderSnippet(snippet, { b: benefit, f: formatted });
+    },
+  },
+  {
+    accessorKey: "createdAt",
+    header: "Date d'ajout",
+    cell: ({ row }) => {
+      const date = new Date(row.original.createdAt);
+      const formatted = date.toLocaleDateString("fr-FR", {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+      });
+
+      const snippet = createRawSnippet<[{ date: string }]>((getData) => {
+        const { date } = getData();
+        return {
+          render: () => `<div class="text-sm text-gray-600">${date}</div>`,
+        };
+      });
+
+      return renderSnippet(snippet, { date: formatted });
+    },
+  },
+  {
+    accessorKey: "soldAt",
+    header: "Date de vente",
+    cell: ({ row }) => {
+      const soldAt = row.original.soldAt;
+
+      if (!soldAt) {
+        const snippet = createRawSnippet<[]>(() => {
+          return {
+            render: () => `<div class="text-sm text-gray-400">-</div>`,
+          };
+        });
+        return renderSnippet(snippet, {});
+      }
+
+      const date = new Date(soldAt);
+      const formatted = date.toLocaleDateString("fr-FR", {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+      });
+
+      const snippet = createRawSnippet<[{ date: string }]>((getData) => {
+        const { date } = getData();
+        return {
+          render: () => `<div class="text-sm text-emerald-600 font-medium">${date}</div>`,
+        };
+      });
+
+      return renderSnippet(snippet, { date: formatted });
+    },
+  },
+  {
+    accessorKey: "tempsVente",
+    header: "Temps de vente",
+    cell: ({ row }) => {
+      const soldAt = row.original.soldAt;
+      const createdAt = row.original.createdAt;
+
+      if (!soldAt) {
+        const snippet = createRawSnippet<[]>(() => {
+          return {
+            render: () => `<div class="text-sm text-gray-400">En cours...</div>`,
+          };
+        });
+        return renderSnippet(snippet, {});
+      }
+
+      const start = new Date(createdAt);
+      const end = new Date(soldAt);
+      const diffMs = end.getTime() - start.getTime();
+      const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+      const diffHours = Math.floor((diffMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+
+      let displayText = "";
+      if (diffDays > 0) {
+        displayText = `${diffDays}j ${diffHours}h`;
+      } else {
+        displayText = `${diffHours}h`;
+      }
+
+      const snippet = createRawSnippet<[{ time: string }]>((getData) => {
+        const { time } = getData();
+        return {
+          render: () => `<div class="text-sm text-blue-600 font-medium">${time}</div>`,
+        };
+      });
+
+      return renderSnippet(snippet, { time: displayText });
     },
   },
   {

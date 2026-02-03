@@ -19,12 +19,14 @@ const itemSchema = z.object({
   category: z.string().min(1),
   size: z.number(),
   unit: z.number(),
-  prixAchat: z.number(),
+  prixAchat: z.number().optional(),
   prixVente: z.number().default(0),
   statusVente: z.boolean().default(false),
   imageUrl: z.string().optional(),
   type: z.string().optional(),
   superType: z.string().optional(),
+  kamasAvant: z.number().optional(),
+  kamasApres: z.number().optional(),
 });
 
 export const actions = {
@@ -35,14 +37,46 @@ export const actions = {
       return fail(400, { form });
     }
 
-    const benefit = form.data.prixVente - form.data.prixAchat;
+    const size = form.data.size || 1;
+
+    // Calculer prixAchat depuis kamasAvant/kamasApres si non fourni
+    let prixAchatTotal = form.data.prixAchat;
+    if (!prixAchatTotal && form.data.kamasAvant && form.data.kamasApres) {
+      prixAchatTotal = form.data.kamasAvant - form.data.kamasApres;
+    }
+
+    if (!prixAchatTotal || prixAchatTotal <= 0) {
+      return fail(400, { form, message: "Prix d'achat requis (ou kamas avant/après)" });
+    }
+
+    const prixVenteTotal = form.data.prixVente;
+
+    // Calculer le prix unitaire
+    const prixAchatUnitaire = Math.round(prixAchatTotal / size);
+    const prixVenteUnitaire = prixVenteTotal ? Math.round(prixVenteTotal / size) : 0;
+    const benefitUnitaire = prixVenteUnitaire - prixAchatUnitaire;
 
     try {
-      await prisma.item.create({
-        data: {
-          ...form.data,
-          benefit,
-        },
+      // Créer `size` objets individuels avec size=1
+      const itemsToCreate = Array.from({ length: size }, () => ({
+        nom: form.data.nom,
+        category: form.data.category,
+        size: 1, // Chaque objet a size=1
+        unit: form.data.unit,
+        prixAchat: prixAchatUnitaire,
+        prixVente: prixVenteUnitaire,
+        benefit: benefitUnitaire,
+        statusVente: form.data.statusVente,
+        imageUrl: form.data.imageUrl,
+        type: form.data.type,
+        superType: form.data.superType,
+        kamasAvant: form.data.kamasAvant,
+        kamasApres: form.data.kamasApres,
+      }));
+
+      // Créer tous les objets en une seule transaction
+      await prisma.item.createMany({
+        data: itemsToCreate,
       });
     } catch (err) {
       return toast.error("Erreur lors de la création de l'item");
@@ -87,7 +121,10 @@ export const actions = {
     try {
       await prisma.item.update({
         where: { id: parseInt(idStr) },
-        data: { statusVente: true }, // On passe le statut à Vrai
+        data: {
+          statusVente: true, // On passe le statut à Vrai
+          soldAt: new Date() // On enregistre la date de vente
+        },
       });
     } catch (err) {
       return fail(500, { message: "Erreur lors de la vente" });
@@ -106,7 +143,10 @@ export const actions = {
     try {
       await prisma.item.update({
         where: { id: parseInt(idStr) },
-        data: { statusVente: false }, // On repasse le statut à FAUX
+        data: {
+          statusVente: false, // On repasse le statut à FAUX
+          soldAt: null // On supprime la date de vente
+        },
       });
     } catch (err) {
       return fail(500, { message: "Erreur lors de la réinitialisation" });
@@ -157,6 +197,39 @@ export const actions = {
     } catch (err) {
       console.error("Erreur update:", err);
       return fail(500, { message: "Erreur lors de la modification de l'item" });
+    }
+
+    return { success: true };
+  },
+
+  updatePrixVente: async ({ request }) => {
+    const data = await request.formData();
+    const idStr = data.get("id") as string;
+    const prixVenteStr = data.get("prixVente") as string;
+
+    if (!idStr || !prixVenteStr) {
+      return fail(400, { message: "ID et prix de vente requis" });
+    }
+
+    try {
+      const id = parseInt(idStr, 10);
+      const prixVente = parseFloat(prixVenteStr);
+
+      // Récupérer l'item pour calculer le nouveau bénéfice
+      const item = await prisma.item.findUnique({ where: { id } });
+      if (!item) {
+        return fail(404, { message: "Item non trouvé" });
+      }
+
+      const benefit = prixVente - item.prixAchat;
+
+      await prisma.item.update({
+        where: { id },
+        data: { prixVente, benefit },
+      });
+    } catch (err) {
+      console.error("Erreur updatePrixVente:", err);
+      return fail(500, { message: "Erreur lors de la mise à jour du prix" });
     }
 
     return { success: true };

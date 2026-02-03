@@ -25,6 +25,8 @@
   let saleStatusLabel = $derived(saleStatus ? "Vendu" : "Disponible");
   let selectedItem = $state(null);
   let priceDialogOpen = $state(false);
+  let kamasAvant = $state();
+  let kamasApres = $state();
 
   function closeDialog() {
     priceDialogOpen = false;
@@ -105,6 +107,22 @@
         type="number"
         bind:value={salePrice}
         name="prixVente"
+        class="w-[180px]"
+      />
+
+      <Input
+        placeholder="Kamas avant"
+        type="number"
+        bind:value={kamasAvant}
+        name="kamasAvant"
+        class="w-[180px]"
+      />
+
+      <Input
+        placeholder="Kamas après"
+        type="number"
+        bind:value={kamasApres}
+        name="kamasApres"
         class="w-[180px]"
       />
 

@@ -33,6 +33,8 @@ export type ItemAvgAggregateOutputType = {
   benefit: number | null
   unit: number | null
   size: number | null
+  kamasAvant: number | null
+  kamasApres: number | null
 }
 
 export type ItemSumAggregateOutputType = {
@@ -42,6 +44,8 @@ export type ItemSumAggregateOutputType = {
   benefit: number | null
   unit: number | null
   size: number | null
+  kamasAvant: number | null
+  kamasApres: number | null
 }
 
 export type ItemMinAggregateOutputType = {
@@ -51,6 +55,7 @@ export type ItemMinAggregateOutputType = {
   prixVente: number | null
   benefit: number | null
   createdAt: Date | null
+  soldAt: Date | null
   statusVente: boolean | null
   category: string | null
   imageUrl: string | null
@@ -58,6 +63,8 @@ export type ItemMinAggregateOutputType = {
   superType: string | null
   unit: number | null
   size: number | null
+  kamasAvant: number | null
+  kamasApres: number | null
 }
 
 export type ItemMaxAggregateOutputType = {
@@ -67,6 +74,7 @@ export type ItemMaxAggregateOutputType = {
   prixVente: number | null
   benefit: number | null
   createdAt: Date | null
+  soldAt: Date | null
   statusVente: boolean | null
   category: string | null
   imageUrl: string | null
@@ -74,6 +82,8 @@ export type ItemMaxAggregateOutputType = {
   superType: string | null
   unit: number | null
   size: number | null
+  kamasAvant: number | null
+  kamasApres: number | null
 }
 
 export type ItemCountAggregateOutputType = {
@@ -83,6 +93,7 @@ export type ItemCountAggregateOutputType = {
   prixVente: number
   benefit: number
   createdAt: number
+  soldAt: number
   statusVente: number
   category: number
   imageUrl: number
@@ -90,6 +101,8 @@ export type ItemCountAggregateOutputType = {
   superType: number
   unit: number
   size: number
+  kamasAvant: number
+  kamasApres: number
   _all: number
 }
 
@@ -101,6 +114,8 @@ export type ItemAvgAggregateInputType = {
   benefit?: true
   unit?: true
   size?: true
+  kamasAvant?: true
+  kamasApres?: true
 }
 
 export type ItemSumAggregateInputType = {
@@ -110,6 +125,8 @@ export type ItemSumAggregateInputType = {
   benefit?: true
   unit?: true
   size?: true
+  kamasAvant?: true
+  kamasApres?: true
 }
 
 export type ItemMinAggregateInputType = {
@@ -119,6 +136,7 @@ export type ItemMinAggregateInputType = {
   prixVente?: true
   benefit?: true
   createdAt?: true
+  soldAt?: true
   statusVente?: true
   category?: true
   imageUrl?: true
@@ -126,6 +144,8 @@ export type ItemMinAggregateInputType = {
   superType?: true
   unit?: true
   size?: true
+  kamasAvant?: true
+  kamasApres?: true
 }
 
 export type ItemMaxAggregateInputType = {
@@ -135,6 +155,7 @@ export type ItemMaxAggregateInputType = {
   prixVente?: true
   benefit?: true
   createdAt?: true
+  soldAt?: true
   statusVente?: true
   category?: true
   imageUrl?: true
@@ -142,6 +163,8 @@ export type ItemMaxAggregateInputType = {
   superType?: true
   unit?: true
   size?: true
+  kamasAvant?: true
+  kamasApres?: true
 }
 
 export type ItemCountAggregateInputType = {
@@ -151,6 +174,7 @@ export type ItemCountAggregateInputType = {
   prixVente?: true
   benefit?: true
   createdAt?: true
+  soldAt?: true
   statusVente?: true
   category?: true
   imageUrl?: true
@@ -158,6 +182,8 @@ export type ItemCountAggregateInputType = {
   superType?: true
   unit?: true
   size?: true
+  kamasAvant?: true
+  kamasApres?: true
   _all?: true
 }
 
@@ -254,6 +280,7 @@ export type ItemGroupByOutputType = {
   prixVente: number | null
   benefit: number
   createdAt: Date
+  soldAt: Date | null
   statusVente: boolean
   category: string
   imageUrl: string | null
@@ -261,6 +288,8 @@ export type ItemGroupByOutputType = {
   superType: string | null
   unit: number | null
   size: number | null
+  kamasAvant: number | null
+  kamasApres: number | null
   _count: ItemCountAggregateOutputType | null
   _avg: ItemAvgAggregateOutputType | null
   _sum: ItemSumAggregateOutputType | null
@@ -293,6 +322,7 @@ export type ItemWhereInput = {
   prixVente?: Prisma.FloatNullableFilter<"Item"> | number | null
   benefit?: Prisma.FloatFilter<"Item"> | number
   createdAt?: Prisma.DateTimeFilter<"Item"> | Date | string
+  soldAt?: Prisma.DateTimeNullableFilter<"Item"> | Date | string | null
   statusVente?: Prisma.BoolFilter<"Item"> | boolean
   category?: Prisma.StringFilter<"Item"> | string
   imageUrl?: Prisma.StringNullableFilter<"Item"> | string | null
@@ -300,6 +330,8 @@ export type ItemWhereInput = {
   superType?: Prisma.StringNullableFilter<"Item"> | string | null
   unit?: Prisma.FloatNullableFilter<"Item"> | number | null
   size?: Prisma.FloatNullableFilter<"Item"> | number | null
+  kamasAvant?: Prisma.FloatNullableFilter<"Item"> | number | null
+  kamasApres?: Prisma.FloatNullableFilter<"Item"> | number | null
 }
 
 export type ItemOrderByWithRelationInput = {
@@ -309,6 +341,7 @@ export type ItemOrderByWithRelationInput = {
   prixVente?: Prisma.SortOrderInput | Prisma.SortOrder
   benefit?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
+  soldAt?: Prisma.SortOrderInput | Prisma.SortOrder
   statusVente?: Prisma.SortOrder
   category?: Prisma.SortOrder
   imageUrl?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -316,6 +349,8 @@ export type ItemOrderByWithRelationInput = {
   superType?: Prisma.SortOrderInput | Prisma.SortOrder
   unit?: Prisma.SortOrderInput | Prisma.SortOrder
   size?: Prisma.SortOrderInput | Prisma.SortOrder
+  kamasAvant?: Prisma.SortOrderInput | Prisma.SortOrder
+  kamasApres?: Prisma.SortOrderInput | Prisma.SortOrder
 }
 
 export type ItemWhereUniqueInput = Prisma.AtLeast<{
@@ -328,6 +363,7 @@ export type ItemWhereUniqueInput = Prisma.AtLeast<{
   prixVente?: Prisma.FloatNullableFilter<"Item"> | number | null
   benefit?: Prisma.FloatFilter<"Item"> | number
   createdAt?: Prisma.DateTimeFilter<"Item"> | Date | string
+  soldAt?: Prisma.DateTimeNullableFilter<"Item"> | Date | string | null
   statusVente?: Prisma.BoolFilter<"Item"> | boolean
   category?: Prisma.StringFilter<"Item"> | string
   imageUrl?: Prisma.StringNullableFilter<"Item"> | string | null
@@ -335,6 +371,8 @@ export type ItemWhereUniqueInput = Prisma.AtLeast<{
   superType?: Prisma.StringNullableFilter<"Item"> | string | null
   unit?: Prisma.FloatNullableFilter<"Item"> | number | null
   size?: Prisma.FloatNullableFilter<"Item"> | number | null
+  kamasAvant?: Prisma.FloatNullableFilter<"Item"> | number | null
+  kamasApres?: Prisma.FloatNullableFilter<"Item"> | number | null
 }, "id">
 
 export type ItemOrderByWithAggregationInput = {
@@ -344,6 +382,7 @@ export type ItemOrderByWithAggregationInput = {
   prixVente?: Prisma.SortOrderInput | Prisma.SortOrder
   benefit?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
+  soldAt?: Prisma.SortOrderInput | Prisma.SortOrder
   statusVente?: Prisma.SortOrder
   category?: Prisma.SortOrder
   imageUrl?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -351,6 +390,8 @@ export type ItemOrderByWithAggregationInput = {
   superType?: Prisma.SortOrderInput | Prisma.SortOrder
   unit?: Prisma.SortOrderInput | Prisma.SortOrder
   size?: Prisma.SortOrderInput | Prisma.SortOrder
+  kamasAvant?: Prisma.SortOrderInput | Prisma.SortOrder
+  kamasApres?: Prisma.SortOrderInput | Prisma.SortOrder
   _count?: Prisma.ItemCountOrderByAggregateInput
   _avg?: Prisma.ItemAvgOrderByAggregateInput
   _max?: Prisma.ItemMaxOrderByAggregateInput
@@ -368,6 +409,7 @@ export type ItemScalarWhereWithAggregatesInput = {
   prixVente?: Prisma.FloatNullableWithAggregatesFilter<"Item"> | number | null
   benefit?: Prisma.FloatWithAggregatesFilter<"Item"> | number
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Item"> | Date | string
+  soldAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Item"> | Date | string | null
   statusVente?: Prisma.BoolWithAggregatesFilter<"Item"> | boolean
   category?: Prisma.StringWithAggregatesFilter<"Item"> | string
   imageUrl?: Prisma.StringNullableWithAggregatesFilter<"Item"> | string | null
@@ -375,6 +417,8 @@ export type ItemScalarWhereWithAggregatesInput = {
   superType?: Prisma.StringNullableWithAggregatesFilter<"Item"> | string | null
   unit?: Prisma.FloatNullableWithAggregatesFilter<"Item"> | number | null
   size?: Prisma.FloatNullableWithAggregatesFilter<"Item"> | number | null
+  kamasAvant?: Prisma.FloatNullableWithAggregatesFilter<"Item"> | number | null
+  kamasApres?: Prisma.FloatNullableWithAggregatesFilter<"Item"> | number | null
 }
 
 export type ItemCreateInput = {
@@ -383,6 +427,7 @@ export type ItemCreateInput = {
   prixVente?: number | null
   benefit: number
   createdAt?: Date | string
+  soldAt?: Date | string | null
   statusVente?: boolean
   category?: string
   imageUrl?: string | null
@@ -390,6 +435,8 @@ export type ItemCreateInput = {
   superType?: string | null
   unit?: number | null
   size?: number | null
+  kamasAvant?: number | null
+  kamasApres?: number | null
 }
 
 export type ItemUncheckedCreateInput = {
@@ -399,6 +446,7 @@ export type ItemUncheckedCreateInput = {
   prixVente?: number | null
   benefit: number
   createdAt?: Date | string
+  soldAt?: Date | string | null
   statusVente?: boolean
   category?: string
   imageUrl?: string | null
@@ -406,6 +454,8 @@ export type ItemUncheckedCreateInput = {
   superType?: string | null
   unit?: number | null
   size?: number | null
+  kamasAvant?: number | null
+  kamasApres?: number | null
 }
 
 export type ItemUpdateInput = {
@@ -414,6 +464,7 @@ export type ItemUpdateInput = {
   prixVente?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   benefit?: Prisma.FloatFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  soldAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   statusVente?: Prisma.BoolFieldUpdateOperationsInput | boolean
   category?: Prisma.StringFieldUpdateOperationsInput | string
   imageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -421,6 +472,8 @@ export type ItemUpdateInput = {
   superType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   unit?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   size?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  kamasAvant?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  kamasApres?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
 }
 
 export type ItemUncheckedUpdateInput = {
@@ -430,6 +483,7 @@ export type ItemUncheckedUpdateInput = {
   prixVente?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   benefit?: Prisma.FloatFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  soldAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   statusVente?: Prisma.BoolFieldUpdateOperationsInput | boolean
   category?: Prisma.StringFieldUpdateOperationsInput | string
   imageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -437,6 +491,8 @@ export type ItemUncheckedUpdateInput = {
   superType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   unit?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   size?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  kamasAvant?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  kamasApres?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
 }
 
 export type ItemCreateManyInput = {
@@ -446,6 +502,7 @@ export type ItemCreateManyInput = {
   prixVente?: number | null
   benefit: number
   createdAt?: Date | string
+  soldAt?: Date | string | null
   statusVente?: boolean
   category?: string
   imageUrl?: string | null
@@ -453,6 +510,8 @@ export type ItemCreateManyInput = {
   superType?: string | null
   unit?: number | null
   size?: number | null
+  kamasAvant?: number | null
+  kamasApres?: number | null
 }
 
 export type ItemUpdateManyMutationInput = {
@@ -461,6 +520,7 @@ export type ItemUpdateManyMutationInput = {
   prixVente?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   benefit?: Prisma.FloatFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  soldAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   statusVente?: Prisma.BoolFieldUpdateOperationsInput | boolean
   category?: Prisma.StringFieldUpdateOperationsInput | string
   imageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -468,6 +528,8 @@ export type ItemUpdateManyMutationInput = {
   superType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   unit?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   size?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  kamasAvant?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  kamasApres?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
 }
 
 export type ItemUncheckedUpdateManyInput = {
@@ -477,6 +539,7 @@ export type ItemUncheckedUpdateManyInput = {
   prixVente?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   benefit?: Prisma.FloatFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  soldAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   statusVente?: Prisma.BoolFieldUpdateOperationsInput | boolean
   category?: Prisma.StringFieldUpdateOperationsInput | string
   imageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -484,6 +547,8 @@ export type ItemUncheckedUpdateManyInput = {
   superType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   unit?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   size?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  kamasAvant?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  kamasApres?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
 }
 
 export type ItemCountOrderByAggregateInput = {
@@ -493,6 +558,7 @@ export type ItemCountOrderByAggregateInput = {
   prixVente?: Prisma.SortOrder
   benefit?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
+  soldAt?: Prisma.SortOrder
   statusVente?: Prisma.SortOrder
   category?: Prisma.SortOrder
   imageUrl?: Prisma.SortOrder
@@ -500,6 +566,8 @@ export type ItemCountOrderByAggregateInput = {
   superType?: Prisma.SortOrder
   unit?: Prisma.SortOrder
   size?: Prisma.SortOrder
+  kamasAvant?: Prisma.SortOrder
+  kamasApres?: Prisma.SortOrder
 }
 
 export type ItemAvgOrderByAggregateInput = {
@@ -509,6 +577,8 @@ export type ItemAvgOrderByAggregateInput = {
   benefit?: Prisma.SortOrder
   unit?: Prisma.SortOrder
   size?: Prisma.SortOrder
+  kamasAvant?: Prisma.SortOrder
+  kamasApres?: Prisma.SortOrder
 }
 
 export type ItemMaxOrderByAggregateInput = {
@@ -518,6 +588,7 @@ export type ItemMaxOrderByAggregateInput = {
   prixVente?: Prisma.SortOrder
   benefit?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
+  soldAt?: Prisma.SortOrder
   statusVente?: Prisma.SortOrder
   category?: Prisma.SortOrder
   imageUrl?: Prisma.SortOrder
@@ -525,6 +596,8 @@ export type ItemMaxOrderByAggregateInput = {
   superType?: Prisma.SortOrder
   unit?: Prisma.SortOrder
   size?: Prisma.SortOrder
+  kamasAvant?: Prisma.SortOrder
+  kamasApres?: Prisma.SortOrder
 }
 
 export type ItemMinOrderByAggregateInput = {
@@ -534,6 +607,7 @@ export type ItemMinOrderByAggregateInput = {
   prixVente?: Prisma.SortOrder
   benefit?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
+  soldAt?: Prisma.SortOrder
   statusVente?: Prisma.SortOrder
   category?: Prisma.SortOrder
   imageUrl?: Prisma.SortOrder
@@ -541,6 +615,8 @@ export type ItemMinOrderByAggregateInput = {
   superType?: Prisma.SortOrder
   unit?: Prisma.SortOrder
   size?: Prisma.SortOrder
+  kamasAvant?: Prisma.SortOrder
+  kamasApres?: Prisma.SortOrder
 }
 
 export type ItemSumOrderByAggregateInput = {
@@ -550,6 +626,8 @@ export type ItemSumOrderByAggregateInput = {
   benefit?: Prisma.SortOrder
   unit?: Prisma.SortOrder
   size?: Prisma.SortOrder
+  kamasAvant?: Prisma.SortOrder
+  kamasApres?: Prisma.SortOrder
 }
 
 export type FloatFieldUpdateOperationsInput = {
@@ -585,6 +663,7 @@ export type ItemSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   prixVente?: boolean
   benefit?: boolean
   createdAt?: boolean
+  soldAt?: boolean
   statusVente?: boolean
   category?: boolean
   imageUrl?: boolean
@@ -592,6 +671,8 @@ export type ItemSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   superType?: boolean
   unit?: boolean
   size?: boolean
+  kamasAvant?: boolean
+  kamasApres?: boolean
 }, ExtArgs["result"]["item"]>
 
 export type ItemSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -601,6 +682,7 @@ export type ItemSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   prixVente?: boolean
   benefit?: boolean
   createdAt?: boolean
+  soldAt?: boolean
   statusVente?: boolean
   category?: boolean
   imageUrl?: boolean
@@ -608,6 +690,8 @@ export type ItemSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   superType?: boolean
   unit?: boolean
   size?: boolean
+  kamasAvant?: boolean
+  kamasApres?: boolean
 }, ExtArgs["result"]["item"]>
 
 export type ItemSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -617,6 +701,7 @@ export type ItemSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   prixVente?: boolean
   benefit?: boolean
   createdAt?: boolean
+  soldAt?: boolean
   statusVente?: boolean
   category?: boolean
   imageUrl?: boolean
@@ -624,6 +709,8 @@ export type ItemSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   superType?: boolean
   unit?: boolean
   size?: boolean
+  kamasAvant?: boolean
+  kamasApres?: boolean
 }, ExtArgs["result"]["item"]>
 
 export type ItemSelectScalar = {
@@ -633,6 +720,7 @@ export type ItemSelectScalar = {
   prixVente?: boolean
   benefit?: boolean
   createdAt?: boolean
+  soldAt?: boolean
   statusVente?: boolean
   category?: boolean
   imageUrl?: boolean
@@ -640,9 +728,11 @@ export type ItemSelectScalar = {
   superType?: boolean
   unit?: boolean
   size?: boolean
+  kamasAvant?: boolean
+  kamasApres?: boolean
 }
 
-export type ItemOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "nom" | "prixAchat" | "prixVente" | "benefit" | "createdAt" | "statusVente" | "category" | "imageUrl" | "type" | "superType" | "unit" | "size", ExtArgs["result"]["item"]>
+export type ItemOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "nom" | "prixAchat" | "prixVente" | "benefit" | "createdAt" | "soldAt" | "statusVente" | "category" | "imageUrl" | "type" | "superType" | "unit" | "size" | "kamasAvant" | "kamasApres", ExtArgs["result"]["item"]>
 
 export type $ItemPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "Item"
@@ -654,6 +744,7 @@ export type $ItemPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     prixVente: number | null
     benefit: number
     createdAt: Date
+    soldAt: Date | null
     statusVente: boolean
     category: string
     imageUrl: string | null
@@ -661,6 +752,8 @@ export type $ItemPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     superType: string | null
     unit: number | null
     size: number | null
+    kamasAvant: number | null
+    kamasApres: number | null
   }, ExtArgs["result"]["item"]>
   composites: {}
 }
@@ -1090,6 +1183,7 @@ export interface ItemFieldRefs {
   readonly prixVente: Prisma.FieldRef<"Item", 'Float'>
   readonly benefit: Prisma.FieldRef<"Item", 'Float'>
   readonly createdAt: Prisma.FieldRef<"Item", 'DateTime'>
+  readonly soldAt: Prisma.FieldRef<"Item", 'DateTime'>
   readonly statusVente: Prisma.FieldRef<"Item", 'Boolean'>
   readonly category: Prisma.FieldRef<"Item", 'String'>
   readonly imageUrl: Prisma.FieldRef<"Item", 'String'>
@@ -1097,6 +1191,8 @@ export interface ItemFieldRefs {
   readonly superType: Prisma.FieldRef<"Item", 'String'>
   readonly unit: Prisma.FieldRef<"Item", 'Float'>
   readonly size: Prisma.FieldRef<"Item", 'Float'>
+  readonly kamasAvant: Prisma.FieldRef<"Item", 'Float'>
+  readonly kamasApres: Prisma.FieldRef<"Item", 'Float'>
 }
     
 
