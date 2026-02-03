@@ -11,8 +11,205 @@
   import { Label } from "$lib/components/ui/label";
   import * as Dialog from "$lib/components/ui/dialog/index.js";
   import { browser } from "$app/environment";
+  import SearchInput from "$lib/components/ui/search/SearchInput.svelte";
+  import { Check, ShoppingCart } from "@lucide/svelte";
 
   let { data } = $props();
+
+  // Gestion des slots d'équipement
+  let slotDialogOpen = $state(false);
+  let selectedSlotIndex = $state<number | null>(null);
+  let selectedSlotType = $state<'left' | 'right' | 'bottom' | null>(null);
+  let searchValue = $state('');
+  let selectedItem = $state(null);
+
+  // Stockage des items équipés (16 slots: 5 gauche + 5 droite + 6 bas)
+  let equippedItems = $state<Record<string, any>>({});
+  // Stockage des prix pour chaque slot
+  let equipmentPrices = $state<Record<string, number>>({});
+  // Stockage du statut acheté/non acheté pour chaque slot
+  let equipmentBought = $state<Record<string, boolean>>({});
+
+  // Charger les équipements depuis localStorage
+  $effect(() => {
+    if (browser) {
+      const saved = localStorage.getItem('dofus-equipement');
+      if (saved) {
+        equippedItems = JSON.parse(saved);
+      }
+      const savedPrices = localStorage.getItem('dofus-equipement-prices');
+      if (savedPrices) {
+        equipmentPrices = JSON.parse(savedPrices);
+      }
+      const savedBought = localStorage.getItem('dofus-equipement-bought');
+      if (savedBought) {
+        equipmentBought = JSON.parse(savedBought);
+      }
+    }
+  });
+
+  // Sauvegarder les équipements dans localStorage
+  function saveEquipment() {
+    if (browser) {
+      localStorage.setItem('dofus-equipement', JSON.stringify(equippedItems));
+    }
+  }
+
+  // Sauvegarder les prix dans localStorage
+  function savePrices() {
+    if (browser) {
+      localStorage.setItem('dofus-equipement-prices', JSON.stringify(equipmentPrices));
+    }
+  }
+
+  function updatePrice(type: string, index: number, price: number) {
+    const key = `${type}-${index}`;
+    equipmentPrices[key] = price;
+    equipmentPrices = { ...equipmentPrices };
+    savePrices();
+  }
+
+  function getPrice(type: string, index: number): number {
+    return equipmentPrices[`${type}-${index}`] || 0;
+  }
+
+  // Sauvegarder le statut acheté dans localStorage
+  function saveBought() {
+    if (browser) {
+      localStorage.setItem('dofus-equipement-bought', JSON.stringify(equipmentBought));
+    }
+  }
+
+  function toggleBought(type: string, index: number) {
+    const key = `${type}-${index}`;
+    equipmentBought[key] = !equipmentBought[key];
+    equipmentBought = { ...equipmentBought };
+    saveBought();
+  }
+
+  function isBought(type: string, index: number): boolean {
+    return equipmentBought[`${type}-${index}`] || false;
+  }
+
+  // Total des équipements non achetés (à ajouter à l'objectif)
+  const totalUnboughtEquipment = $derived(() => {
+    let total = 0;
+    for (let i = 0; i < 5; i++) {
+      if (getEquippedItem('left', i) && !isBought('left', i)) {
+        total += getPrice('left', i);
+      }
+    }
+    for (let i = 0; i < 5; i++) {
+      if (getEquippedItem('right', i) && !isBought('right', i)) {
+        total += getPrice('right', i);
+      }
+    }
+    for (let i = 0; i < 6; i++) {
+      if (getEquippedItem('bottom', i) && !isBought('bottom', i)) {
+        total += getPrice('bottom', i);
+      }
+    }
+    return total;
+  });
+
+  // Formater un prix avec des espaces (1900000 -> "1 900 000")
+  function formatPriceDisplay(price: number): string {
+    if (price === 0) return '';
+    return price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
+  }
+
+  // Parser un prix formaté (enlever les espaces)
+  function parsePriceInput(value: string): number {
+    return parseInt(value.replace(/\s/g, '')) || 0;
+  }
+
+  // Gérer l'input avec formatage
+  function handlePriceInput(e: Event, type: string, index: number) {
+    const input = e.currentTarget as HTMLInputElement;
+    const cursorPos = input.selectionStart || 0;
+    const oldValue = input.value;
+    const oldLength = oldValue.length;
+
+    // Parser et reformater
+    const numericValue = parsePriceInput(input.value);
+    updatePrice(type, index, numericValue);
+
+    // Mettre à jour l'affichage formaté
+    const newValue = formatPriceDisplay(numericValue);
+    input.value = newValue;
+
+    // Ajuster la position du curseur
+    const newLength = newValue.length;
+    const diff = newLength - oldLength;
+    const newCursorPos = Math.max(0, cursorPos + diff);
+    input.setSelectionRange(newCursorPos, newCursorPos);
+  }
+
+  // Liste de tous les items équipés pour l'affichage
+  const allEquippedItems = $derived(() => {
+    const items: { type: string; index: number; item: any; price: number }[] = [];
+    for (let i = 0; i < 5; i++) {
+      const item = getEquippedItem('left', i);
+      if (item) items.push({ type: 'left', index: i, item, price: getPrice('left', i) });
+    }
+    for (let i = 0; i < 5; i++) {
+      const item = getEquippedItem('right', i);
+      if (item) items.push({ type: 'right', index: i, item, price: getPrice('right', i) });
+    }
+    for (let i = 0; i < 6; i++) {
+      const item = getEquippedItem('bottom', i);
+      if (item) items.push({ type: 'bottom', index: i, item, price: getPrice('bottom', i) });
+    }
+    return items;
+  });
+
+  // Total des prix (tous les équipements)
+  const totalEquipmentPrice = $derived(() => {
+    return allEquippedItems().reduce((sum, e) => sum + e.price, 0);
+  });
+
+  // Total des équipements achetés uniquement
+  const totalBoughtEquipment = $derived(() => {
+    return allEquippedItems()
+      .filter(e => isBought(e.type, e.index))
+      .reduce((sum, e) => sum + e.price, 0);
+  });
+
+  function openSlotDialog(type: 'left' | 'right' | 'bottom', index: number) {
+    selectedSlotType = type;
+    selectedSlotIndex = index;
+    searchValue = '';
+    selectedItem = null;
+    slotDialogOpen = true;
+  }
+
+  function confirmEquipItem() {
+    if (selectedItem && selectedSlotType !== null && selectedSlotIndex !== null) {
+      const key = `${selectedSlotType}-${selectedSlotIndex}`;
+      equippedItems[key] = selectedItem;
+      saveEquipment();
+      slotDialogOpen = false;
+    }
+  }
+
+  function removeEquipItem(type: string, index: number) {
+    const key = `${type}-${index}`;
+    delete equippedItems[key];
+    equippedItems = { ...equippedItems };
+    saveEquipment();
+    // Supprimer aussi le prix associé
+    delete equipmentPrices[key];
+    equipmentPrices = { ...equipmentPrices };
+    savePrices();
+    // Supprimer aussi le statut acheté
+    delete equipmentBought[key];
+    equipmentBought = { ...equipmentBought };
+    saveBought();
+  }
+
+  function getEquippedItem(type: string, index: number) {
+    return equippedItems[`${type}-${index}`];
+  }
 
   // Gestion de l'objectif personnalisé (stocké dans localStorage)
   let objectifMontant = $state(1_000_000_000);
@@ -68,14 +265,14 @@
     .reduce((sum, item) => sum + item.benefit, 0));
 
   // Statistiques avancées pour la page Statistiques
-  const capitalTotal = $derived(totalDepense + gainReel);
+  const capitalTotal = $derived(totalDepense + gainReel + totalBoughtEquipment());
   const itemsVendus = $derived(data.items.filter(item => item.statusVente).length);
   const itemsEnVente = $derived(data.items.filter(item => !item.statusVente).length);
   const tauxReussite = $derived(data.items.length > 0 ? (itemsVendus / data.items.length) * 100 : 0);
 
-  // Utiliser l'objectif personnalisé
-  const progressionPourcent = $derived((capitalTotal / objectifMontant) * 100);
-  const restantPourObjectif = $derived(objectifMontant - capitalTotal);
+  // Utiliser l'objectif personnalisé (ajouter les équipements non achetés au restant)
+  const progressionPourcent = $derived((capitalTotal / (objectifMontant + totalUnboughtEquipment())) * 100);
+  const restantPourObjectif = $derived(objectifMontant + totalUnboughtEquipment() - capitalTotal);
 
   // Calcul des jours restants jusqu'à la date objectif
   const aujourdhui = new Date();
@@ -164,11 +361,173 @@
     </Tabs.Content>
 
     <!-- Onglet Equipement -->
-    <Tabs.Content value="equipement" class="space-y-4">
-      <div class="rounded-lg border bg-card p-6">
-        <p class="text-center text-muted-foreground">Contenu à venir...</p>
+    <Tabs.Content value="equipement" class="py-4">
+      <div class="flex flex-col items-center gap-4">
+        <!-- Total -->
+        <div class="flex items-center gap-2 text-lg font-bold">
+          Total: {formatNumber(totalEquipmentPrice())}
+          <img class="size-5" src="/Kama.png" alt="Kama">
+        </div>
+
+        <div class="flex items-center gap-4">
+          <!-- 5 slots à gauche avec inputs -->
+          <div class="flex flex-col gap-2">
+            {#each Array(5) as _, i}
+              {@const item = getEquippedItem('left', i)}
+              <div class="flex items-center gap-2">
+                <button
+                  type="button"
+                  onclick={() => openSlotDialog('left', i)}
+                  oncontextmenu={(e) => { e.preventDefault(); if (item) removeEquipItem('left', i); }}
+                  class="size-14 rounded-lg border-2 border-dashed border-muted-foreground/50 bg-muted/50 hover:border-primary hover:bg-muted transition-colors flex items-center justify-center overflow-hidden flex-shrink-0"
+                >
+                  {#if item}
+                    <img src={item.img} alt={item.name?.fr} class="size-12 object-contain" />
+                  {/if}
+                </button>
+                <div class="relative">
+                  <Input
+                    type="text"
+                    value={formatPriceDisplay(getPrice('left', i))}
+                    oninput={(e) => handlePriceInput(e, 'left', i)}
+                    class="w-28 text-center text-sm pr-5"
+                    placeholder="Prix"
+                  />
+                  <img class="size-4 absolute right-1.5 top-1/2 -translate-y-1/2" src="/Kama.png" alt="Kama">
+                </div>
+                <button
+                  type="button"
+                  onclick={() => item && toggleBought('left', i)}
+                  class="size-6 rounded-md flex items-center justify-center transition-colors {item ? (isBought('left', i) ? 'bg-emerald-500 text-white' : 'bg-muted hover:bg-muted/80 text-muted-foreground') : 'invisible'}"
+                  title={isBought('left', i) ? 'Acheté' : 'Non acheté'}
+                >
+                  {#if isBought('left', i)}
+                    <Check class="size-4" />
+                  {:else}
+                    <ShoppingCart class="size-4" />
+                  {/if}
+                </button>
+              </div>
+            {/each}
+          </div>
+
+          <!-- Image centrale -->
+          <img
+            src="/character.png"
+            alt="Character"
+            class="max-h-[50vh] object-contain"
+          />
+
+          <!-- 5 slots à droite avec inputs -->
+          <div class="flex flex-col gap-2">
+            {#each Array(5) as _, i}
+              {@const item = getEquippedItem('right', i)}
+              <div class="flex items-center gap-2">
+                <button
+                  type="button"
+                  onclick={() => item && toggleBought('right', i)}
+                  class="size-6 rounded-md flex items-center justify-center transition-colors {item ? (isBought('right', i) ? 'bg-emerald-500 text-white' : 'bg-muted hover:bg-muted/80 text-muted-foreground') : 'invisible'}"
+                  title={isBought('right', i) ? 'Acheté' : 'Non acheté'}
+                >
+                  {#if isBought('right', i)}
+                    <Check class="size-4" />
+                  {:else}
+                    <ShoppingCart class="size-4" />
+                  {/if}
+                </button>
+                <div class="relative">
+                  <img class="size-4 absolute right-1.5 top-1/2 -translate-y-1/2" src="/Kama.png" alt="Kama">
+                  <Input
+                    type="text"
+                    value={formatPriceDisplay(getPrice('right', i))}
+                    oninput={(e) => handlePriceInput(e, 'right', i)}
+                    class="w-28 text-center text-sm pr-5"
+                    placeholder="Prix"
+                  />
+                </div>
+                <button
+                  type="button"
+                  onclick={() => openSlotDialog('right', i)}
+                  oncontextmenu={(e) => { e.preventDefault(); if (item) removeEquipItem('right', i); }}
+                  class="size-14 rounded-lg border-2 border-dashed border-muted-foreground/50 bg-muted/50 hover:border-primary hover:bg-muted transition-colors flex items-center justify-center overflow-hidden flex-shrink-0"
+                >
+                  {#if item}
+                    <img src={item.img} alt={item.name?.fr} class="size-12 object-contain" />
+                  {/if}
+                </button>
+              </div>
+            {/each}
+          </div>
+        </div>
+
+        <!-- 6 slots en bas avec inputs -->
+        <div class="flex gap-4">
+          {#each Array(6) as _, i}
+            {@const item = getEquippedItem('bottom', i)}
+            <div class="flex flex-col items-center gap-1">
+              <button
+                type="button"
+                onclick={() => openSlotDialog('bottom', i)}
+                oncontextmenu={(e) => { e.preventDefault(); if (item) removeEquipItem('bottom', i); }}
+                class="size-14 rounded-lg border-2 border-dashed border-muted-foreground/50 bg-muted/50 hover:border-primary hover:bg-muted transition-colors flex items-center justify-center overflow-hidden"
+              >
+                {#if item}
+                  <img src={item.img} alt={item.name?.fr} class="size-12 object-contain" />
+                {/if}
+              </button>
+              <div class="relative">
+                <Input
+                  type="text"
+                  value={formatPriceDisplay(getPrice('bottom', i))}
+                  oninput={(e) => handlePriceInput(e, 'bottom', i)}
+                  class="w-28 text-center text-sm pr-5"
+                  placeholder="Prix"
+                />
+                <img class="size-4 absolute right-1 top-1/2 -translate-y-1/2" src="/Kama.png" alt="Kama">
+              </div>
+              {#if item}
+                <button
+                  type="button"
+                  onclick={() => toggleBought('bottom', i)}
+                  class="size-6 rounded-md flex items-center justify-center transition-colors {isBought('bottom', i) ? 'bg-emerald-500 text-white' : 'bg-muted hover:bg-muted/80 text-muted-foreground'}"
+                  title={isBought('bottom', i) ? 'Acheté' : 'Non acheté'}
+                >
+                  {#if isBought('bottom', i)}
+                    <Check class="size-4" />
+                  {:else}
+                    <ShoppingCart class="size-4" />
+                  {/if}
+                </button>
+              {/if}
+            </div>
+          {/each}
+        </div>
       </div>
     </Tabs.Content>
+
+    <!-- Dialog pour sélectionner un item -->
+    <Dialog.Root bind:open={slotDialogOpen}>
+      <Dialog.Content class="sm:max-w-[400px]">
+        <Dialog.Header>
+          <Dialog.Title>Sélectionner un équipement</Dialog.Title>
+        </Dialog.Header>
+        <div class="py-4">
+          <SearchInput
+            placeholder="Rechercher un item..."
+            bind:value={searchValue}
+            bind:selectedItem
+          />
+        </div>
+        <Dialog.Footer>
+          <Button variant="outline" onclick={() => slotDialogOpen = false}>
+            Annuler
+          </Button>
+          <Button onclick={confirmEquipItem} disabled={!selectedItem}>
+            Équiper
+          </Button>
+        </Dialog.Footer>
+      </Dialog.Content>
+    </Dialog.Root>
 
     <!-- Onglet Statistiques -->
     <Tabs.Content value="stats" class="space-y-6">
