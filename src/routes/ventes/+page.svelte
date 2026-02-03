@@ -119,17 +119,20 @@
   <title>Otomaï - Ventes</title>
 </svelte:head>
 
-<div class="flex w-full flex-col gap-4">
-  <HeaderItem />
-
+<div class="flex w-full flex-col gap-2">
+  
   <Tabs.Root value="hotel" class="w-full">
-    <Tabs.List class="grid w-full grid-cols-2">
-      <Tabs.Trigger value="hotel">Hôtel de Vente</Tabs.Trigger>
-      <Tabs.Trigger value="stats">Statistiques</Tabs.Trigger>
-    </Tabs.List>
-
+    <div class="w-full justify-center flex flex-row">
+      <Tabs.List class="grid  grid-cols-3">
+        <Tabs.Trigger value="hotel">Hôtel de Vente</Tabs.Trigger>
+        <Tabs.Trigger value="equipement">Equipement</Tabs.Trigger>
+        <Tabs.Trigger value="stats">Statistiques</Tabs.Trigger>
+      </Tabs.List>
+    </div>
+    
     <!-- Onglet Hôtel de Vente -->
     <Tabs.Content value="hotel" class="space-y-4">
+      <HeaderItem />
       <!-- Statistiques de base -->
       <div class="grid grid-cols-3 gap-4">
         <div class="rounded-lg border bg-card p-2 px-3 flex flex-row items-center gap-2">
@@ -158,6 +161,13 @@
       </div>
 
       <DataTable data={data.items} {columns} />
+    </Tabs.Content>
+
+    <!-- Onglet Equipement -->
+    <Tabs.Content value="equipement" class="space-y-4">
+      <div class="rounded-lg border bg-card p-6">
+        <p class="text-center text-muted-foreground">Contenu à venir...</p>
+      </div>
     </Tabs.Content>
 
     <!-- Onglet Statistiques -->
