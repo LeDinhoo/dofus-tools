@@ -7,6 +7,11 @@ echo "🚀 Démarrage du processus de déploiement..."
 IMAGE_NAME="ghcr.io/ledinhoo/dofus-tools/dftools"
 TIMESTAMP=$(date +%Y%m%d-%H%M%S)
 
+# VPS Configuration (modifie ces valeurs)
+VPS_HOST="${VPS_HOST:-81.17.100.156}"
+VPS_USER="${VPS_USER:-root}"
+VPS_PATH="${VPS_PATH:-/root/dofus-tools}"
+
 # Vérifier si on veut un tag spécifique ou latest
 TAG="${1:-latest}"
 
@@ -30,20 +35,17 @@ else
         .
 fi
 
-echo "🔐 Note: Assurez-vous d'être connecté avec: docker login ghcr.io -u USERNAME"
-
 echo ""
-echo "✅ Déploiement terminé avec succès!"
-echo ""
-echo "📋 Image poussée:"
+echo "✅ Image poussée avec succès!"
 echo "   - ${IMAGE_NAME}:${TAG}"
 if [ "$TAG" != "latest" ]; then
     echo "   - ${IMAGE_NAME}:latest"
 fi
+
 echo ""
-echo "🖥️  Pour déployer sur le VPS:"
-echo "   ssh user@your-vps"
-echo "   cd /path/to/dofus-tools"
-echo "   docker compose pull"
-echo "   docker compose up -d"
+echo "🖥️  Déploiement sur le VPS (${VPS_USER}@${VPS_HOST})..."
+ssh ${VPS_USER}@${VPS_HOST} "cd ${VPS_PATH} && docker compose pull && docker compose up -d"
+
+echo ""
+echo "✅ Déploiement terminé avec succès!"
 echo ""
