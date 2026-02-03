@@ -12,9 +12,23 @@
   import * as Dialog from "$lib/components/ui/dialog/index.js";
   import { browser } from "$app/environment";
   import SearchInput from "$lib/components/ui/search/SearchInput.svelte";
-  import { Check, ShoppingCart, Download, Loader2 } from "@lucide/svelte";
+  import { Check, ShoppingCart, Download, Loader2, DollarSign, Plus, Trash2 } from "@lucide/svelte";
+  import { invalidateAll } from "$app/navigation";
 
   let { data } = $props();
+
+  // Gestion des sets d'équipement
+  type EquipmentSet = {
+    id: number;
+    name: string;
+    includeInObjective: boolean;
+    equipments: any[];
+  };
+  let equipmentSets = $state<EquipmentSet[]>([]);
+  let activeSetId = $state<number | null>(null);
+  let showRenameDialog = $state(false);
+  let renameSetId = $state<number | null>(null);
+  let renameValue = $state('');
 
   // Gestion des slots d'équipement
   let slotDialogOpen = $state(false);
@@ -39,16 +53,34 @@
   // État de chargement des équipements
   let equipmentLoading = $state(true);
 
-  // Charger les équipements depuis l'API
+  // Charger les sets depuis l'API
   $effect(() => {
     if (browser) {
-      loadEquipmentFromDB();
+      loadEquipmentSets();
     }
   });
 
-  async function loadEquipmentFromDB() {
+  async function loadEquipmentSets() {
     try {
-      const response = await fetch('/api/equipment');
+      const response = await fetch('/api/equipment-sets');
+      if (response.ok) {
+        const data = await response.json();
+        equipmentSets = data.sets || [];
+        if (equipmentSets.length > 0 && !activeSetId) {
+          activeSetId = equipmentSets[0].id;
+          await loadEquipmentFromSet(equipmentSets[0].id);
+        }
+      }
+    } catch (e) {
+      console.error('Erreur chargement sets:', e);
+    } finally {
+      equipmentLoading = false;
+    }
+  }
+
+  async function loadEquipmentFromSet(setId: number) {
+    try {
+      const response = await fetch(`/api/equipment?setId=${setId}`);
       if (response.ok) {
         const data = await response.json();
         equippedItems = data.equippedItems || {};
@@ -57,24 +89,111 @@
       }
     } catch (e) {
       console.error('Erreur chargement équipements:', e);
-    } finally {
-      equipmentLoading = false;
     }
+  }
+
+  async function switchSet(setId: number) {
+    activeSetId = setId;
+    await loadEquipmentFromSet(setId);
+  }
+
+  async function createNewSet() {
+    try {
+      const response = await fetch('/api/equipment-sets', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: `Équipement ${equipmentSets.length + 1}` }),
+      });
+      if (response.ok) {
+        const data = await response.json();
+        equipmentSets = [...equipmentSets, data.set];
+        await switchSet(data.set.id);
+      }
+    } catch (e) {
+      console.error('Erreur création set:', e);
+    }
+  }
+
+  async function deleteSet(setId: number) {
+    if (equipmentSets.length <= 1) return;
+    try {
+      const response = await fetch('/api/equipment-sets', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ setId }),
+      });
+      if (response.ok) {
+        equipmentSets = equipmentSets.filter(s => s.id !== setId);
+        if (activeSetId === setId && equipmentSets.length > 0) {
+          await switchSet(equipmentSets[0].id);
+        }
+      }
+    } catch (e) {
+      console.error('Erreur suppression set:', e);
+    }
+  }
+
+  async function toggleSetObjective(setId: number) {
+    const set = equipmentSets.find(s => s.id === setId);
+    if (!set) return;
+    try {
+      await fetch('/api/equipment-sets', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ setId, includeInObjective: !set.includeInObjective }),
+      });
+      equipmentSets = equipmentSets.map(s =>
+        s.id === setId ? { ...s, includeInObjective: !s.includeInObjective } : s
+      );
+    } catch (e) {
+      console.error('Erreur mise à jour set:', e);
+    }
+  }
+
+  async function renameSet() {
+    if (!renameSetId || !renameValue.trim()) return;
+    try {
+      await fetch('/api/equipment-sets', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ setId: renameSetId, name: renameValue }),
+      });
+      equipmentSets = equipmentSets.map(s =>
+        s.id === renameSetId ? { ...s, name: renameValue } : s
+      );
+      showRenameDialog = false;
+      renameSetId = null;
+      renameValue = '';
+    } catch (e) {
+      console.error('Erreur renommage set:', e);
+    }
+  }
+
+  function openRenameDialog(setId: number, currentName: string) {
+    renameSetId = setId;
+    renameValue = currentName;
+    showRenameDialog = true;
   }
 
   // Sauvegarder un équipement dans la DB
   async function saveEquipmentSlot(slot: string, itemData: any, price?: number, bought?: boolean) {
+    if (!activeSetId) return;
+    const finalPrice = price ?? equipmentPrices[slot] ?? 0;
+    const finalBought = bought ?? equipmentBought[slot] ?? false;
     try {
       await fetch('/api/equipment', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
+          setId: activeSetId,
           slot,
           itemData,
-          price: price ?? equipmentPrices[slot] ?? 0,
-          bought: bought ?? equipmentBought[slot] ?? false
+          price: finalPrice,
+          bought: finalBought
         }),
       });
+      // Mettre à jour le set local pour les totaux
+      updateLocalSetEquipment(slot, itemData, finalPrice, finalBought);
     } catch (e) {
       console.error('Erreur sauvegarde équipement:', e);
     }
@@ -82,15 +201,46 @@
 
   // Mettre à jour prix ou statut acheté
   async function updateEquipmentSlot(slot: string, price?: number, bought?: boolean) {
+    if (!activeSetId) return;
     try {
       await fetch('/api/equipment', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ slot, price, bought }),
+        body: JSON.stringify({ setId: activeSetId, slot, price, bought }),
       });
+      // Mettre à jour le set local pour les totaux
+      const set = equipmentSets.find(s => s.id === activeSetId);
+      if (set) {
+        const eq = set.equipments.find(e => e.slot === slot);
+        if (eq) {
+          if (price !== undefined) eq.price = price;
+          if (bought !== undefined) eq.bought = bought;
+          equipmentSets = [...equipmentSets];
+        }
+      }
     } catch (e) {
       console.error('Erreur mise à jour équipement:', e);
     }
+  }
+
+  // Mettre à jour l'équipement local dans le set
+  function updateLocalSetEquipment(slot: string, itemData: any, price: number, bought: boolean) {
+    const set = equipmentSets.find(s => s.id === activeSetId);
+    if (!set) return;
+
+    if (itemData === null) {
+      // Supprimer l'équipement
+      set.equipments = set.equipments.filter(e => e.slot !== slot);
+    } else {
+      // Ajouter ou mettre à jour
+      const existingIndex = set.equipments.findIndex(e => e.slot === slot);
+      if (existingIndex >= 0) {
+        set.equipments[existingIndex] = { slot, itemData, price, bought };
+      } else {
+        set.equipments.push({ slot, itemData, price, bought });
+      }
+    }
+    equipmentSets = [...equipmentSets];
   }
 
   function updatePrice(type: string, index: number, price: number) {
@@ -115,22 +265,16 @@
     return equipmentBought[`${type}-${index}`] || false;
   }
 
-  // Total des équipements non achetés (à ajouter à l'objectif)
+  // Total des équipements non achetés (pour les sets avec includeInObjective = true)
   const totalUnboughtEquipment = $derived(() => {
     let total = 0;
-    for (let i = 0; i < 5; i++) {
-      if (getEquippedItem('left', i) && !isBought('left', i)) {
-        total += getPrice('left', i);
-      }
-    }
-    for (let i = 0; i < 5; i++) {
-      if (getEquippedItem('right', i) && !isBought('right', i)) {
-        total += getPrice('right', i);
-      }
-    }
-    for (let i = 0; i < 6; i++) {
-      if (getEquippedItem('bottom', i) && !isBought('bottom', i)) {
-        total += getPrice('bottom', i);
+    for (const set of equipmentSets) {
+      if (set.includeInObjective) {
+        for (const eq of set.equipments) {
+          if (!eq.bought) {
+            total += eq.price || 0;
+          }
+        }
       }
     }
     return total;
@@ -192,11 +336,19 @@
     return allEquippedItems().reduce((sum, e) => sum + e.price, 0);
   });
 
-  // Total des équipements achetés uniquement
+  // Total des équipements achetés uniquement (pour les sets avec includeInObjective = true)
   const totalBoughtEquipment = $derived(() => {
-    return allEquippedItems()
-      .filter(e => isBought(e.type, e.index))
-      .reduce((sum, e) => sum + e.price, 0);
+    let total = 0;
+    for (const set of equipmentSets) {
+      if (set.includeInObjective) {
+        for (const eq of set.equipments) {
+          if (eq.bought) {
+            total += eq.price || 0;
+          }
+        }
+      }
+    }
+    return total;
   });
 
   function openSlotDialog(type: 'left' | 'right' | 'bottom', index: number) {
@@ -227,6 +379,41 @@
     equipmentBought = { ...equipmentBought };
     // Supprimer de la DB (itemData = null)
     saveEquipmentSlot(key, null);
+  }
+
+  // Vendre un équipement (créer un item dans l'hôtel de vente)
+  async function sellEquipment(type: string, index: number) {
+    const key = `${type}-${index}`;
+    const item = equippedItems[key];
+    const price = equipmentPrices[key] || 0;
+
+    if (!item || price <= 0) return;
+
+    const formData = new FormData();
+    formData.append('nom', item.name?.fr || item.name || 'Item inconnu');
+    formData.append('category', 'equipement');
+    formData.append('size', '1');
+    formData.append('unit', '1');
+    formData.append('prixAchat', price.toString());
+    formData.append('prixVente', '0');
+    formData.append('statusVente', 'false');
+    formData.append('imageUrl', item.img || '');
+    formData.append('type', item.type?.name?.fr || '');
+    formData.append('superType', item.superType?.name?.fr || '');
+
+    try {
+      const response = await fetch('?/createItem', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (response.ok) {
+        // Rafraîchir les données
+        await invalidateAll();
+      }
+    } catch (e) {
+      console.error('Erreur lors de la mise en vente:', e);
+    }
   }
 
   function getEquippedItem(type: string, index: number) {
@@ -368,8 +555,14 @@
           ...Array(6).fill(null).map((_, i) => ({ type: 'bottom', index: i }))
         ];
 
-        // Vider les équipements existants (en DB)
-        await fetch('/api/equipment', { method: 'DELETE' });
+        if (!activeSetId) return;
+
+        // Vider les équipements existants du set actif (en DB)
+        await fetch('/api/equipment', {
+          method: 'DELETE',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ setId: activeSetId })
+        });
 
         // Vider localement
         equippedItems = {};
@@ -386,6 +579,9 @@
         }
 
         equippedItems = { ...equippedItems };
+
+        // Recharger les sets pour mettre à jour les totaux
+        await loadEquipmentSets();
 
         // Fermer seulement si tous les items ont été trouvés
         if (importNotFound.length === 0) {
@@ -452,6 +648,43 @@
     <!-- Onglet Equipement -->
     <Tabs.Content value="equipement" class="py-4">
       <div class="flex flex-col items-center gap-4">
+        <!-- Onglets des sets d'équipement -->
+        <div class="flex items-center gap-2 flex-wrap justify-center">
+          {#each equipmentSets as set}
+            <div class="flex items-center gap-1">
+              <button
+                type="button"
+                onclick={() => switchSet(set.id)}
+                ondblclick={() => openRenameDialog(set.id, set.name)}
+                class="px-3 py-1.5 rounded-md text-sm font-medium transition-colors {activeSetId === set.id ? 'bg-primary text-primary-foreground' : 'bg-muted hover:bg-muted/80'}"
+              >
+                {set.name}
+              </button>
+              <button
+                type="button"
+                onclick={() => toggleSetObjective(set.id)}
+                class="size-5 rounded flex items-center justify-center {set.includeInObjective ? 'bg-emerald-500 text-white' : 'bg-muted text-muted-foreground'}"
+                title={set.includeInObjective ? 'Inclus dans l\'objectif' : 'Non inclus dans l\'objectif'}
+              >
+                <Check class="size-3" />
+              </button>
+              {#if equipmentSets.length > 1}
+                <button
+                  type="button"
+                  onclick={() => deleteSet(set.id)}
+                  class="size-5 rounded flex items-center justify-center bg-red-500/10 text-red-500 hover:bg-red-500/20"
+                  title="Supprimer ce set"
+                >
+                  <Trash2 class="size-3" />
+                </button>
+              {/if}
+            </div>
+          {/each}
+          <Button variant="outline" size="sm" onclick={createNewSet} class="h-7">
+            <Plus class="size-4" />
+          </Button>
+        </div>
+
         <!-- Header avec Total et bouton Import -->
         <div class="flex items-center gap-4">
           <div class="flex items-center gap-2 text-lg font-bold">
@@ -502,6 +735,14 @@
                     <ShoppingCart class="size-4" />
                   {/if}
                 </button>
+                <button
+                  type="button"
+                  onclick={() => item && sellEquipment('left', i)}
+                  class="size-6 rounded-md flex items-center justify-center transition-colors {item && isBought('left', i) && getPrice('left', i) > 0 ? 'bg-amber-500 hover:bg-amber-600 text-white' : 'invisible'}"
+                  title="Mettre en vente"
+                >
+                  <DollarSign class="size-4" />
+                </button>
               </div>
             {/each}
           </div>
@@ -518,6 +759,14 @@
             {#each Array(5) as _, i}
               {@const item = getEquippedItem('right', i)}
               <div class="flex items-center gap-2">
+                <button
+                  type="button"
+                  onclick={() => item && sellEquipment('right', i)}
+                  class="size-6 rounded-md flex items-center justify-center transition-colors {item && isBought('right', i) && getPrice('right', i) > 0 ? 'bg-amber-500 hover:bg-amber-600 text-white' : 'invisible'}"
+                  title="Mettre en vente"
+                >
+                  <DollarSign class="size-4" />
+                </button>
                 <button
                   type="button"
                   onclick={() => item && toggleBought('right', i)}
@@ -581,18 +830,30 @@
                 <img class="size-4 absolute right-1 top-1/2 -translate-y-1/2" src="/Kama.png" alt="Kama">
               </div>
               {#if item}
-                <button
-                  type="button"
-                  onclick={() => toggleBought('bottom', i)}
-                  class="size-6 rounded-md flex items-center justify-center transition-colors {isBought('bottom', i) ? 'bg-emerald-500 text-white' : 'bg-muted hover:bg-muted/80 text-muted-foreground'}"
-                  title={isBought('bottom', i) ? 'Acheté' : 'Non acheté'}
-                >
-                  {#if isBought('bottom', i)}
-                    <Check class="size-4" />
-                  {:else}
-                    <ShoppingCart class="size-4" />
+                <div class="flex gap-1">
+                  <button
+                    type="button"
+                    onclick={() => toggleBought('bottom', i)}
+                    class="size-6 rounded-md flex items-center justify-center transition-colors {isBought('bottom', i) ? 'bg-emerald-500 text-white' : 'bg-muted hover:bg-muted/80 text-muted-foreground'}"
+                    title={isBought('bottom', i) ? 'Acheté' : 'Non acheté'}
+                  >
+                    {#if isBought('bottom', i)}
+                      <Check class="size-4" />
+                    {:else}
+                      <ShoppingCart class="size-4" />
+                    {/if}
+                  </button>
+                  {#if isBought('bottom', i) && getPrice('bottom', i) > 0}
+                    <button
+                      type="button"
+                      onclick={() => sellEquipment('bottom', i)}
+                      class="size-6 rounded-md flex items-center justify-center transition-colors bg-amber-500 hover:bg-amber-600 text-white"
+                      title="Mettre en vente"
+                    >
+                      <DollarSign class="size-4" />
+                    </button>
                   {/if}
-                </button>
+                </div>
               {/if}
             </div>
           {/each}
@@ -856,6 +1117,30 @@
         </Button>
         <Button onclick={sauvegarderObjectif}>
           Sauvegarder
+        </Button>
+      </Dialog.Footer>
+    </Dialog.Content>
+  </Dialog.Root>
+
+  <!-- Dialog pour renommer un set -->
+  <Dialog.Root bind:open={showRenameDialog}>
+    <Dialog.Content class="sm:max-w-[400px]">
+      <Dialog.Header>
+        <Dialog.Title>Renommer l'équipement</Dialog.Title>
+      </Dialog.Header>
+      <div class="py-4">
+        <Input
+          type="text"
+          bind:value={renameValue}
+          placeholder="Nom de l'équipement"
+        />
+      </div>
+      <Dialog.Footer>
+        <Button variant="outline" onclick={() => { showRenameDialog = false; renameSetId = null; }}>
+          Annuler
+        </Button>
+        <Button onclick={renameSet}>
+          Renommer
         </Button>
       </Dialog.Footer>
     </Dialog.Content>

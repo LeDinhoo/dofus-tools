@@ -28,17 +28,19 @@ export type AggregateEquipment = {
 
 export type EquipmentAvgAggregateOutputType = {
   id: number | null
+  setId: number | null
   price: number | null
 }
 
 export type EquipmentSumAggregateOutputType = {
   id: number | null
+  setId: number | null
   price: number | null
 }
 
 export type EquipmentMinAggregateOutputType = {
   id: number | null
-  userId: string | null
+  setId: number | null
   slot: string | null
   price: number | null
   bought: boolean | null
@@ -48,7 +50,7 @@ export type EquipmentMinAggregateOutputType = {
 
 export type EquipmentMaxAggregateOutputType = {
   id: number | null
-  userId: string | null
+  setId: number | null
   slot: string | null
   price: number | null
   bought: boolean | null
@@ -58,7 +60,7 @@ export type EquipmentMaxAggregateOutputType = {
 
 export type EquipmentCountAggregateOutputType = {
   id: number
-  userId: number
+  setId: number
   slot: number
   itemData: number
   price: number
@@ -71,17 +73,19 @@ export type EquipmentCountAggregateOutputType = {
 
 export type EquipmentAvgAggregateInputType = {
   id?: true
+  setId?: true
   price?: true
 }
 
 export type EquipmentSumAggregateInputType = {
   id?: true
+  setId?: true
   price?: true
 }
 
 export type EquipmentMinAggregateInputType = {
   id?: true
-  userId?: true
+  setId?: true
   slot?: true
   price?: true
   bought?: true
@@ -91,7 +95,7 @@ export type EquipmentMinAggregateInputType = {
 
 export type EquipmentMaxAggregateInputType = {
   id?: true
-  userId?: true
+  setId?: true
   slot?: true
   price?: true
   bought?: true
@@ -101,7 +105,7 @@ export type EquipmentMaxAggregateInputType = {
 
 export type EquipmentCountAggregateInputType = {
   id?: true
-  userId?: true
+  setId?: true
   slot?: true
   itemData?: true
   price?: true
@@ -199,7 +203,7 @@ export type EquipmentGroupByArgs<ExtArgs extends runtime.Types.Extensions.Intern
 
 export type EquipmentGroupByOutputType = {
   id: number
-  userId: string
+  setId: number
   slot: string
   itemData: runtime.JsonValue
   price: number
@@ -233,47 +237,47 @@ export type EquipmentWhereInput = {
   OR?: Prisma.EquipmentWhereInput[]
   NOT?: Prisma.EquipmentWhereInput | Prisma.EquipmentWhereInput[]
   id?: Prisma.IntFilter<"Equipment"> | number
-  userId?: Prisma.StringFilter<"Equipment"> | string
+  setId?: Prisma.IntFilter<"Equipment"> | number
   slot?: Prisma.StringFilter<"Equipment"> | string
   itemData?: Prisma.JsonFilter<"Equipment">
   price?: Prisma.IntFilter<"Equipment"> | number
   bought?: Prisma.BoolFilter<"Equipment"> | boolean
   createdAt?: Prisma.DateTimeFilter<"Equipment"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Equipment"> | Date | string
-  user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
+  set?: Prisma.XOR<Prisma.EquipmentSetScalarRelationFilter, Prisma.EquipmentSetWhereInput>
 }
 
 export type EquipmentOrderByWithRelationInput = {
   id?: Prisma.SortOrder
-  userId?: Prisma.SortOrder
+  setId?: Prisma.SortOrder
   slot?: Prisma.SortOrder
   itemData?: Prisma.SortOrder
   price?: Prisma.SortOrder
   bought?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
-  user?: Prisma.UserOrderByWithRelationInput
+  set?: Prisma.EquipmentSetOrderByWithRelationInput
 }
 
 export type EquipmentWhereUniqueInput = Prisma.AtLeast<{
   id?: number
-  userId_slot?: Prisma.EquipmentUserIdSlotCompoundUniqueInput
+  setId_slot?: Prisma.EquipmentSetIdSlotCompoundUniqueInput
   AND?: Prisma.EquipmentWhereInput | Prisma.EquipmentWhereInput[]
   OR?: Prisma.EquipmentWhereInput[]
   NOT?: Prisma.EquipmentWhereInput | Prisma.EquipmentWhereInput[]
-  userId?: Prisma.StringFilter<"Equipment"> | string
+  setId?: Prisma.IntFilter<"Equipment"> | number
   slot?: Prisma.StringFilter<"Equipment"> | string
   itemData?: Prisma.JsonFilter<"Equipment">
   price?: Prisma.IntFilter<"Equipment"> | number
   bought?: Prisma.BoolFilter<"Equipment"> | boolean
   createdAt?: Prisma.DateTimeFilter<"Equipment"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Equipment"> | Date | string
-  user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
-}, "id" | "userId_slot">
+  set?: Prisma.XOR<Prisma.EquipmentSetScalarRelationFilter, Prisma.EquipmentSetWhereInput>
+}, "id" | "setId_slot">
 
 export type EquipmentOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
-  userId?: Prisma.SortOrder
+  setId?: Prisma.SortOrder
   slot?: Prisma.SortOrder
   itemData?: Prisma.SortOrder
   price?: Prisma.SortOrder
@@ -292,7 +296,7 @@ export type EquipmentScalarWhereWithAggregatesInput = {
   OR?: Prisma.EquipmentScalarWhereWithAggregatesInput[]
   NOT?: Prisma.EquipmentScalarWhereWithAggregatesInput | Prisma.EquipmentScalarWhereWithAggregatesInput[]
   id?: Prisma.IntWithAggregatesFilter<"Equipment"> | number
-  userId?: Prisma.StringWithAggregatesFilter<"Equipment"> | string
+  setId?: Prisma.IntWithAggregatesFilter<"Equipment"> | number
   slot?: Prisma.StringWithAggregatesFilter<"Equipment"> | string
   itemData?: Prisma.JsonWithAggregatesFilter<"Equipment">
   price?: Prisma.IntWithAggregatesFilter<"Equipment"> | number
@@ -308,12 +312,12 @@ export type EquipmentCreateInput = {
   bought?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
-  user: Prisma.UserCreateNestedOneWithoutEquipmentsInput
+  set: Prisma.EquipmentSetCreateNestedOneWithoutEquipmentsInput
 }
 
 export type EquipmentUncheckedCreateInput = {
   id?: number
-  userId: string
+  setId: number
   slot: string
   itemData: Prisma.JsonNullValueInput | runtime.InputJsonValue
   price?: number
@@ -329,12 +333,12 @@ export type EquipmentUpdateInput = {
   bought?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  user?: Prisma.UserUpdateOneRequiredWithoutEquipmentsNestedInput
+  set?: Prisma.EquipmentSetUpdateOneRequiredWithoutEquipmentsNestedInput
 }
 
 export type EquipmentUncheckedUpdateInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
-  userId?: Prisma.StringFieldUpdateOperationsInput | string
+  setId?: Prisma.IntFieldUpdateOperationsInput | number
   slot?: Prisma.StringFieldUpdateOperationsInput | string
   itemData?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   price?: Prisma.IntFieldUpdateOperationsInput | number
@@ -345,7 +349,7 @@ export type EquipmentUncheckedUpdateInput = {
 
 export type EquipmentCreateManyInput = {
   id?: number
-  userId: string
+  setId: number
   slot: string
   itemData: Prisma.JsonNullValueInput | runtime.InputJsonValue
   price?: number
@@ -365,7 +369,7 @@ export type EquipmentUpdateManyMutationInput = {
 
 export type EquipmentUncheckedUpdateManyInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
-  userId?: Prisma.StringFieldUpdateOperationsInput | string
+  setId?: Prisma.IntFieldUpdateOperationsInput | number
   slot?: Prisma.StringFieldUpdateOperationsInput | string
   itemData?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   price?: Prisma.IntFieldUpdateOperationsInput | number
@@ -384,14 +388,14 @@ export type EquipmentOrderByRelationAggregateInput = {
   _count?: Prisma.SortOrder
 }
 
-export type EquipmentUserIdSlotCompoundUniqueInput = {
-  userId: string
+export type EquipmentSetIdSlotCompoundUniqueInput = {
+  setId: number
   slot: string
 }
 
 export type EquipmentCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
-  userId?: Prisma.SortOrder
+  setId?: Prisma.SortOrder
   slot?: Prisma.SortOrder
   itemData?: Prisma.SortOrder
   price?: Prisma.SortOrder
@@ -402,12 +406,13 @@ export type EquipmentCountOrderByAggregateInput = {
 
 export type EquipmentAvgOrderByAggregateInput = {
   id?: Prisma.SortOrder
+  setId?: Prisma.SortOrder
   price?: Prisma.SortOrder
 }
 
 export type EquipmentMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
-  userId?: Prisma.SortOrder
+  setId?: Prisma.SortOrder
   slot?: Prisma.SortOrder
   price?: Prisma.SortOrder
   bought?: Prisma.SortOrder
@@ -417,7 +422,7 @@ export type EquipmentMaxOrderByAggregateInput = {
 
 export type EquipmentMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
-  userId?: Prisma.SortOrder
+  setId?: Prisma.SortOrder
   slot?: Prisma.SortOrder
   price?: Prisma.SortOrder
   bought?: Prisma.SortOrder
@@ -427,60 +432,53 @@ export type EquipmentMinOrderByAggregateInput = {
 
 export type EquipmentSumOrderByAggregateInput = {
   id?: Prisma.SortOrder
+  setId?: Prisma.SortOrder
   price?: Prisma.SortOrder
 }
 
-export type EquipmentCreateNestedManyWithoutUserInput = {
-  create?: Prisma.XOR<Prisma.EquipmentCreateWithoutUserInput, Prisma.EquipmentUncheckedCreateWithoutUserInput> | Prisma.EquipmentCreateWithoutUserInput[] | Prisma.EquipmentUncheckedCreateWithoutUserInput[]
-  connectOrCreate?: Prisma.EquipmentCreateOrConnectWithoutUserInput | Prisma.EquipmentCreateOrConnectWithoutUserInput[]
-  createMany?: Prisma.EquipmentCreateManyUserInputEnvelope
+export type EquipmentCreateNestedManyWithoutSetInput = {
+  create?: Prisma.XOR<Prisma.EquipmentCreateWithoutSetInput, Prisma.EquipmentUncheckedCreateWithoutSetInput> | Prisma.EquipmentCreateWithoutSetInput[] | Prisma.EquipmentUncheckedCreateWithoutSetInput[]
+  connectOrCreate?: Prisma.EquipmentCreateOrConnectWithoutSetInput | Prisma.EquipmentCreateOrConnectWithoutSetInput[]
+  createMany?: Prisma.EquipmentCreateManySetInputEnvelope
   connect?: Prisma.EquipmentWhereUniqueInput | Prisma.EquipmentWhereUniqueInput[]
 }
 
-export type EquipmentUncheckedCreateNestedManyWithoutUserInput = {
-  create?: Prisma.XOR<Prisma.EquipmentCreateWithoutUserInput, Prisma.EquipmentUncheckedCreateWithoutUserInput> | Prisma.EquipmentCreateWithoutUserInput[] | Prisma.EquipmentUncheckedCreateWithoutUserInput[]
-  connectOrCreate?: Prisma.EquipmentCreateOrConnectWithoutUserInput | Prisma.EquipmentCreateOrConnectWithoutUserInput[]
-  createMany?: Prisma.EquipmentCreateManyUserInputEnvelope
+export type EquipmentUncheckedCreateNestedManyWithoutSetInput = {
+  create?: Prisma.XOR<Prisma.EquipmentCreateWithoutSetInput, Prisma.EquipmentUncheckedCreateWithoutSetInput> | Prisma.EquipmentCreateWithoutSetInput[] | Prisma.EquipmentUncheckedCreateWithoutSetInput[]
+  connectOrCreate?: Prisma.EquipmentCreateOrConnectWithoutSetInput | Prisma.EquipmentCreateOrConnectWithoutSetInput[]
+  createMany?: Prisma.EquipmentCreateManySetInputEnvelope
   connect?: Prisma.EquipmentWhereUniqueInput | Prisma.EquipmentWhereUniqueInput[]
 }
 
-export type EquipmentUpdateManyWithoutUserNestedInput = {
-  create?: Prisma.XOR<Prisma.EquipmentCreateWithoutUserInput, Prisma.EquipmentUncheckedCreateWithoutUserInput> | Prisma.EquipmentCreateWithoutUserInput[] | Prisma.EquipmentUncheckedCreateWithoutUserInput[]
-  connectOrCreate?: Prisma.EquipmentCreateOrConnectWithoutUserInput | Prisma.EquipmentCreateOrConnectWithoutUserInput[]
-  upsert?: Prisma.EquipmentUpsertWithWhereUniqueWithoutUserInput | Prisma.EquipmentUpsertWithWhereUniqueWithoutUserInput[]
-  createMany?: Prisma.EquipmentCreateManyUserInputEnvelope
+export type EquipmentUpdateManyWithoutSetNestedInput = {
+  create?: Prisma.XOR<Prisma.EquipmentCreateWithoutSetInput, Prisma.EquipmentUncheckedCreateWithoutSetInput> | Prisma.EquipmentCreateWithoutSetInput[] | Prisma.EquipmentUncheckedCreateWithoutSetInput[]
+  connectOrCreate?: Prisma.EquipmentCreateOrConnectWithoutSetInput | Prisma.EquipmentCreateOrConnectWithoutSetInput[]
+  upsert?: Prisma.EquipmentUpsertWithWhereUniqueWithoutSetInput | Prisma.EquipmentUpsertWithWhereUniqueWithoutSetInput[]
+  createMany?: Prisma.EquipmentCreateManySetInputEnvelope
   set?: Prisma.EquipmentWhereUniqueInput | Prisma.EquipmentWhereUniqueInput[]
   disconnect?: Prisma.EquipmentWhereUniqueInput | Prisma.EquipmentWhereUniqueInput[]
   delete?: Prisma.EquipmentWhereUniqueInput | Prisma.EquipmentWhereUniqueInput[]
   connect?: Prisma.EquipmentWhereUniqueInput | Prisma.EquipmentWhereUniqueInput[]
-  update?: Prisma.EquipmentUpdateWithWhereUniqueWithoutUserInput | Prisma.EquipmentUpdateWithWhereUniqueWithoutUserInput[]
-  updateMany?: Prisma.EquipmentUpdateManyWithWhereWithoutUserInput | Prisma.EquipmentUpdateManyWithWhereWithoutUserInput[]
+  update?: Prisma.EquipmentUpdateWithWhereUniqueWithoutSetInput | Prisma.EquipmentUpdateWithWhereUniqueWithoutSetInput[]
+  updateMany?: Prisma.EquipmentUpdateManyWithWhereWithoutSetInput | Prisma.EquipmentUpdateManyWithWhereWithoutSetInput[]
   deleteMany?: Prisma.EquipmentScalarWhereInput | Prisma.EquipmentScalarWhereInput[]
 }
 
-export type EquipmentUncheckedUpdateManyWithoutUserNestedInput = {
-  create?: Prisma.XOR<Prisma.EquipmentCreateWithoutUserInput, Prisma.EquipmentUncheckedCreateWithoutUserInput> | Prisma.EquipmentCreateWithoutUserInput[] | Prisma.EquipmentUncheckedCreateWithoutUserInput[]
-  connectOrCreate?: Prisma.EquipmentCreateOrConnectWithoutUserInput | Prisma.EquipmentCreateOrConnectWithoutUserInput[]
-  upsert?: Prisma.EquipmentUpsertWithWhereUniqueWithoutUserInput | Prisma.EquipmentUpsertWithWhereUniqueWithoutUserInput[]
-  createMany?: Prisma.EquipmentCreateManyUserInputEnvelope
+export type EquipmentUncheckedUpdateManyWithoutSetNestedInput = {
+  create?: Prisma.XOR<Prisma.EquipmentCreateWithoutSetInput, Prisma.EquipmentUncheckedCreateWithoutSetInput> | Prisma.EquipmentCreateWithoutSetInput[] | Prisma.EquipmentUncheckedCreateWithoutSetInput[]
+  connectOrCreate?: Prisma.EquipmentCreateOrConnectWithoutSetInput | Prisma.EquipmentCreateOrConnectWithoutSetInput[]
+  upsert?: Prisma.EquipmentUpsertWithWhereUniqueWithoutSetInput | Prisma.EquipmentUpsertWithWhereUniqueWithoutSetInput[]
+  createMany?: Prisma.EquipmentCreateManySetInputEnvelope
   set?: Prisma.EquipmentWhereUniqueInput | Prisma.EquipmentWhereUniqueInput[]
   disconnect?: Prisma.EquipmentWhereUniqueInput | Prisma.EquipmentWhereUniqueInput[]
   delete?: Prisma.EquipmentWhereUniqueInput | Prisma.EquipmentWhereUniqueInput[]
   connect?: Prisma.EquipmentWhereUniqueInput | Prisma.EquipmentWhereUniqueInput[]
-  update?: Prisma.EquipmentUpdateWithWhereUniqueWithoutUserInput | Prisma.EquipmentUpdateWithWhereUniqueWithoutUserInput[]
-  updateMany?: Prisma.EquipmentUpdateManyWithWhereWithoutUserInput | Prisma.EquipmentUpdateManyWithWhereWithoutUserInput[]
+  update?: Prisma.EquipmentUpdateWithWhereUniqueWithoutSetInput | Prisma.EquipmentUpdateWithWhereUniqueWithoutSetInput[]
+  updateMany?: Prisma.EquipmentUpdateManyWithWhereWithoutSetInput | Prisma.EquipmentUpdateManyWithWhereWithoutSetInput[]
   deleteMany?: Prisma.EquipmentScalarWhereInput | Prisma.EquipmentScalarWhereInput[]
 }
 
-export type IntFieldUpdateOperationsInput = {
-  set?: number
-  increment?: number
-  decrement?: number
-  multiply?: number
-  divide?: number
-}
-
-export type EquipmentCreateWithoutUserInput = {
+export type EquipmentCreateWithoutSetInput = {
   slot: string
   itemData: Prisma.JsonNullValueInput | runtime.InputJsonValue
   price?: number
@@ -489,7 +487,7 @@ export type EquipmentCreateWithoutUserInput = {
   updatedAt?: Date | string
 }
 
-export type EquipmentUncheckedCreateWithoutUserInput = {
+export type EquipmentUncheckedCreateWithoutSetInput = {
   id?: number
   slot: string
   itemData: Prisma.JsonNullValueInput | runtime.InputJsonValue
@@ -499,30 +497,30 @@ export type EquipmentUncheckedCreateWithoutUserInput = {
   updatedAt?: Date | string
 }
 
-export type EquipmentCreateOrConnectWithoutUserInput = {
+export type EquipmentCreateOrConnectWithoutSetInput = {
   where: Prisma.EquipmentWhereUniqueInput
-  create: Prisma.XOR<Prisma.EquipmentCreateWithoutUserInput, Prisma.EquipmentUncheckedCreateWithoutUserInput>
+  create: Prisma.XOR<Prisma.EquipmentCreateWithoutSetInput, Prisma.EquipmentUncheckedCreateWithoutSetInput>
 }
 
-export type EquipmentCreateManyUserInputEnvelope = {
-  data: Prisma.EquipmentCreateManyUserInput | Prisma.EquipmentCreateManyUserInput[]
+export type EquipmentCreateManySetInputEnvelope = {
+  data: Prisma.EquipmentCreateManySetInput | Prisma.EquipmentCreateManySetInput[]
   skipDuplicates?: boolean
 }
 
-export type EquipmentUpsertWithWhereUniqueWithoutUserInput = {
+export type EquipmentUpsertWithWhereUniqueWithoutSetInput = {
   where: Prisma.EquipmentWhereUniqueInput
-  update: Prisma.XOR<Prisma.EquipmentUpdateWithoutUserInput, Prisma.EquipmentUncheckedUpdateWithoutUserInput>
-  create: Prisma.XOR<Prisma.EquipmentCreateWithoutUserInput, Prisma.EquipmentUncheckedCreateWithoutUserInput>
+  update: Prisma.XOR<Prisma.EquipmentUpdateWithoutSetInput, Prisma.EquipmentUncheckedUpdateWithoutSetInput>
+  create: Prisma.XOR<Prisma.EquipmentCreateWithoutSetInput, Prisma.EquipmentUncheckedCreateWithoutSetInput>
 }
 
-export type EquipmentUpdateWithWhereUniqueWithoutUserInput = {
+export type EquipmentUpdateWithWhereUniqueWithoutSetInput = {
   where: Prisma.EquipmentWhereUniqueInput
-  data: Prisma.XOR<Prisma.EquipmentUpdateWithoutUserInput, Prisma.EquipmentUncheckedUpdateWithoutUserInput>
+  data: Prisma.XOR<Prisma.EquipmentUpdateWithoutSetInput, Prisma.EquipmentUncheckedUpdateWithoutSetInput>
 }
 
-export type EquipmentUpdateManyWithWhereWithoutUserInput = {
+export type EquipmentUpdateManyWithWhereWithoutSetInput = {
   where: Prisma.EquipmentScalarWhereInput
-  data: Prisma.XOR<Prisma.EquipmentUpdateManyMutationInput, Prisma.EquipmentUncheckedUpdateManyWithoutUserInput>
+  data: Prisma.XOR<Prisma.EquipmentUpdateManyMutationInput, Prisma.EquipmentUncheckedUpdateManyWithoutSetInput>
 }
 
 export type EquipmentScalarWhereInput = {
@@ -530,7 +528,7 @@ export type EquipmentScalarWhereInput = {
   OR?: Prisma.EquipmentScalarWhereInput[]
   NOT?: Prisma.EquipmentScalarWhereInput | Prisma.EquipmentScalarWhereInput[]
   id?: Prisma.IntFilter<"Equipment"> | number
-  userId?: Prisma.StringFilter<"Equipment"> | string
+  setId?: Prisma.IntFilter<"Equipment"> | number
   slot?: Prisma.StringFilter<"Equipment"> | string
   itemData?: Prisma.JsonFilter<"Equipment">
   price?: Prisma.IntFilter<"Equipment"> | number
@@ -539,7 +537,7 @@ export type EquipmentScalarWhereInput = {
   updatedAt?: Prisma.DateTimeFilter<"Equipment"> | Date | string
 }
 
-export type EquipmentCreateManyUserInput = {
+export type EquipmentCreateManySetInput = {
   id?: number
   slot: string
   itemData: Prisma.JsonNullValueInput | runtime.InputJsonValue
@@ -549,7 +547,7 @@ export type EquipmentCreateManyUserInput = {
   updatedAt?: Date | string
 }
 
-export type EquipmentUpdateWithoutUserInput = {
+export type EquipmentUpdateWithoutSetInput = {
   slot?: Prisma.StringFieldUpdateOperationsInput | string
   itemData?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   price?: Prisma.IntFieldUpdateOperationsInput | number
@@ -558,7 +556,7 @@ export type EquipmentUpdateWithoutUserInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
-export type EquipmentUncheckedUpdateWithoutUserInput = {
+export type EquipmentUncheckedUpdateWithoutSetInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
   slot?: Prisma.StringFieldUpdateOperationsInput | string
   itemData?: Prisma.JsonNullValueInput | runtime.InputJsonValue
@@ -568,7 +566,7 @@ export type EquipmentUncheckedUpdateWithoutUserInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
-export type EquipmentUncheckedUpdateManyWithoutUserInput = {
+export type EquipmentUncheckedUpdateManyWithoutSetInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
   slot?: Prisma.StringFieldUpdateOperationsInput | string
   itemData?: Prisma.JsonNullValueInput | runtime.InputJsonValue
@@ -582,43 +580,43 @@ export type EquipmentUncheckedUpdateManyWithoutUserInput = {
 
 export type EquipmentSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
-  userId?: boolean
+  setId?: boolean
   slot?: boolean
   itemData?: boolean
   price?: boolean
   bought?: boolean
   createdAt?: boolean
   updatedAt?: boolean
-  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+  set?: boolean | Prisma.EquipmentSetDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["equipment"]>
 
 export type EquipmentSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
-  userId?: boolean
+  setId?: boolean
   slot?: boolean
   itemData?: boolean
   price?: boolean
   bought?: boolean
   createdAt?: boolean
   updatedAt?: boolean
-  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+  set?: boolean | Prisma.EquipmentSetDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["equipment"]>
 
 export type EquipmentSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
-  userId?: boolean
+  setId?: boolean
   slot?: boolean
   itemData?: boolean
   price?: boolean
   bought?: boolean
   createdAt?: boolean
   updatedAt?: boolean
-  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+  set?: boolean | Prisma.EquipmentSetDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["equipment"]>
 
 export type EquipmentSelectScalar = {
   id?: boolean
-  userId?: boolean
+  setId?: boolean
   slot?: boolean
   itemData?: boolean
   price?: boolean
@@ -627,25 +625,25 @@ export type EquipmentSelectScalar = {
   updatedAt?: boolean
 }
 
-export type EquipmentOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "slot" | "itemData" | "price" | "bought" | "createdAt" | "updatedAt", ExtArgs["result"]["equipment"]>
+export type EquipmentOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "setId" | "slot" | "itemData" | "price" | "bought" | "createdAt" | "updatedAt", ExtArgs["result"]["equipment"]>
 export type EquipmentInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+  set?: boolean | Prisma.EquipmentSetDefaultArgs<ExtArgs>
 }
 export type EquipmentIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+  set?: boolean | Prisma.EquipmentSetDefaultArgs<ExtArgs>
 }
 export type EquipmentIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+  set?: boolean | Prisma.EquipmentSetDefaultArgs<ExtArgs>
 }
 
 export type $EquipmentPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "Equipment"
   objects: {
-    user: Prisma.$UserPayload<ExtArgs>
+    set: Prisma.$EquipmentSetPayload<ExtArgs>
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: number
-    userId: string
+    setId: number
     slot: string
     itemData: runtime.JsonValue
     price: number
@@ -1046,7 +1044,7 @@ readonly fields: EquipmentFieldRefs;
  */
 export interface Prisma__EquipmentClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
-  user<T extends Prisma.UserDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.UserDefaultArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+  set<T extends Prisma.EquipmentSetDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.EquipmentSetDefaultArgs<ExtArgs>>): Prisma.Prisma__EquipmentSetClient<runtime.Types.Result.GetResult<Prisma.$EquipmentSetPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1077,7 +1075,7 @@ export interface Prisma__EquipmentClient<T, Null = never, ExtArgs extends runtim
  */
 export interface EquipmentFieldRefs {
   readonly id: Prisma.FieldRef<"Equipment", 'Int'>
-  readonly userId: Prisma.FieldRef<"Equipment", 'String'>
+  readonly setId: Prisma.FieldRef<"Equipment", 'Int'>
   readonly slot: Prisma.FieldRef<"Equipment", 'String'>
   readonly itemData: Prisma.FieldRef<"Equipment", 'Json'>
   readonly price: Prisma.FieldRef<"Equipment", 'Int'>

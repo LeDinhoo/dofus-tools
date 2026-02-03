@@ -200,7 +200,7 @@ export type UserWhereInput = {
   updatedAt?: Prisma.DateTimeFilter<"User"> | Date | string
   sessions?: Prisma.SessionListRelationFilter
   accounts?: Prisma.AccountListRelationFilter
-  equipments?: Prisma.EquipmentListRelationFilter
+  equipmentSets?: Prisma.EquipmentSetListRelationFilter
 }
 
 export type UserOrderByWithRelationInput = {
@@ -213,7 +213,7 @@ export type UserOrderByWithRelationInput = {
   updatedAt?: Prisma.SortOrder
   sessions?: Prisma.SessionOrderByRelationAggregateInput
   accounts?: Prisma.AccountOrderByRelationAggregateInput
-  equipments?: Prisma.EquipmentOrderByRelationAggregateInput
+  equipmentSets?: Prisma.EquipmentSetOrderByRelationAggregateInput
 }
 
 export type UserWhereUniqueInput = Prisma.AtLeast<{
@@ -229,7 +229,7 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   updatedAt?: Prisma.DateTimeFilter<"User"> | Date | string
   sessions?: Prisma.SessionListRelationFilter
   accounts?: Prisma.AccountListRelationFilter
-  equipments?: Prisma.EquipmentListRelationFilter
+  equipmentSets?: Prisma.EquipmentSetListRelationFilter
 }, "id" | "email">
 
 export type UserOrderByWithAggregationInput = {
@@ -268,7 +268,7 @@ export type UserCreateInput = {
   updatedAt: Date | string
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
   accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
-  equipments?: Prisma.EquipmentCreateNestedManyWithoutUserInput
+  equipmentSets?: Prisma.EquipmentSetCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateInput = {
@@ -281,7 +281,7 @@ export type UserUncheckedCreateInput = {
   updatedAt: Date | string
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
   accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
-  equipments?: Prisma.EquipmentUncheckedCreateNestedManyWithoutUserInput
+  equipmentSets?: Prisma.EquipmentSetUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserUpdateInput = {
@@ -294,7 +294,7 @@ export type UserUpdateInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
   accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
-  equipments?: Prisma.EquipmentUpdateManyWithoutUserNestedInput
+  equipmentSets?: Prisma.EquipmentSetUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateInput = {
@@ -307,7 +307,7 @@ export type UserUncheckedUpdateInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
   accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
-  equipments?: Prisma.EquipmentUncheckedUpdateManyWithoutUserNestedInput
+  equipmentSets?: Prisma.EquipmentSetUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateManyInput = {
@@ -391,18 +391,18 @@ export type DateTimeFieldUpdateOperationsInput = {
   set?: Date | string
 }
 
-export type UserCreateNestedOneWithoutEquipmentsInput = {
-  create?: Prisma.XOR<Prisma.UserCreateWithoutEquipmentsInput, Prisma.UserUncheckedCreateWithoutEquipmentsInput>
-  connectOrCreate?: Prisma.UserCreateOrConnectWithoutEquipmentsInput
+export type UserCreateNestedOneWithoutEquipmentSetsInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutEquipmentSetsInput, Prisma.UserUncheckedCreateWithoutEquipmentSetsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutEquipmentSetsInput
   connect?: Prisma.UserWhereUniqueInput
 }
 
-export type UserUpdateOneRequiredWithoutEquipmentsNestedInput = {
-  create?: Prisma.XOR<Prisma.UserCreateWithoutEquipmentsInput, Prisma.UserUncheckedCreateWithoutEquipmentsInput>
-  connectOrCreate?: Prisma.UserCreateOrConnectWithoutEquipmentsInput
-  upsert?: Prisma.UserUpsertWithoutEquipmentsInput
+export type UserUpdateOneRequiredWithoutEquipmentSetsNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutEquipmentSetsInput, Prisma.UserUncheckedCreateWithoutEquipmentSetsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutEquipmentSetsInput
+  upsert?: Prisma.UserUpsertWithoutEquipmentSetsInput
   connect?: Prisma.UserWhereUniqueInput
-  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutEquipmentsInput, Prisma.UserUpdateWithoutEquipmentsInput>, Prisma.UserUncheckedUpdateWithoutEquipmentsInput>
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutEquipmentSetsInput, Prisma.UserUpdateWithoutEquipmentSetsInput>, Prisma.UserUncheckedUpdateWithoutEquipmentSetsInput>
 }
 
 export type UserCreateNestedOneWithoutSessionsInput = {
@@ -433,7 +433,7 @@ export type UserUpdateOneRequiredWithoutAccountsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutAccountsInput, Prisma.UserUpdateWithoutAccountsInput>, Prisma.UserUncheckedUpdateWithoutAccountsInput>
 }
 
-export type UserCreateWithoutEquipmentsInput = {
+export type UserCreateWithoutEquipmentSetsInput = {
   id: string
   name: string
   email: string
@@ -445,7 +445,7 @@ export type UserCreateWithoutEquipmentsInput = {
   accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
 }
 
-export type UserUncheckedCreateWithoutEquipmentsInput = {
+export type UserUncheckedCreateWithoutEquipmentSetsInput = {
   id: string
   name: string
   email: string
@@ -457,23 +457,23 @@ export type UserUncheckedCreateWithoutEquipmentsInput = {
   accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
 }
 
-export type UserCreateOrConnectWithoutEquipmentsInput = {
+export type UserCreateOrConnectWithoutEquipmentSetsInput = {
   where: Prisma.UserWhereUniqueInput
-  create: Prisma.XOR<Prisma.UserCreateWithoutEquipmentsInput, Prisma.UserUncheckedCreateWithoutEquipmentsInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutEquipmentSetsInput, Prisma.UserUncheckedCreateWithoutEquipmentSetsInput>
 }
 
-export type UserUpsertWithoutEquipmentsInput = {
-  update: Prisma.XOR<Prisma.UserUpdateWithoutEquipmentsInput, Prisma.UserUncheckedUpdateWithoutEquipmentsInput>
-  create: Prisma.XOR<Prisma.UserCreateWithoutEquipmentsInput, Prisma.UserUncheckedCreateWithoutEquipmentsInput>
+export type UserUpsertWithoutEquipmentSetsInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutEquipmentSetsInput, Prisma.UserUncheckedUpdateWithoutEquipmentSetsInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutEquipmentSetsInput, Prisma.UserUncheckedCreateWithoutEquipmentSetsInput>
   where?: Prisma.UserWhereInput
 }
 
-export type UserUpdateToOneWithWhereWithoutEquipmentsInput = {
+export type UserUpdateToOneWithWhereWithoutEquipmentSetsInput = {
   where?: Prisma.UserWhereInput
-  data: Prisma.XOR<Prisma.UserUpdateWithoutEquipmentsInput, Prisma.UserUncheckedUpdateWithoutEquipmentsInput>
+  data: Prisma.XOR<Prisma.UserUpdateWithoutEquipmentSetsInput, Prisma.UserUncheckedUpdateWithoutEquipmentSetsInput>
 }
 
-export type UserUpdateWithoutEquipmentsInput = {
+export type UserUpdateWithoutEquipmentSetsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
@@ -485,7 +485,7 @@ export type UserUpdateWithoutEquipmentsInput = {
   accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
 }
 
-export type UserUncheckedUpdateWithoutEquipmentsInput = {
+export type UserUncheckedUpdateWithoutEquipmentSetsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
@@ -506,7 +506,7 @@ export type UserCreateWithoutSessionsInput = {
   createdAt: Date | string
   updatedAt: Date | string
   accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
-  equipments?: Prisma.EquipmentCreateNestedManyWithoutUserInput
+  equipmentSets?: Prisma.EquipmentSetCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutSessionsInput = {
@@ -518,7 +518,7 @@ export type UserUncheckedCreateWithoutSessionsInput = {
   createdAt: Date | string
   updatedAt: Date | string
   accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
-  equipments?: Prisma.EquipmentUncheckedCreateNestedManyWithoutUserInput
+  equipmentSets?: Prisma.EquipmentSetUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutSessionsInput = {
@@ -546,7 +546,7 @@ export type UserUpdateWithoutSessionsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
-  equipments?: Prisma.EquipmentUpdateManyWithoutUserNestedInput
+  equipmentSets?: Prisma.EquipmentSetUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutSessionsInput = {
@@ -558,7 +558,7 @@ export type UserUncheckedUpdateWithoutSessionsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
-  equipments?: Prisma.EquipmentUncheckedUpdateManyWithoutUserNestedInput
+  equipmentSets?: Prisma.EquipmentSetUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutAccountsInput = {
@@ -570,7 +570,7 @@ export type UserCreateWithoutAccountsInput = {
   createdAt: Date | string
   updatedAt: Date | string
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
-  equipments?: Prisma.EquipmentCreateNestedManyWithoutUserInput
+  equipmentSets?: Prisma.EquipmentSetCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutAccountsInput = {
@@ -582,7 +582,7 @@ export type UserUncheckedCreateWithoutAccountsInput = {
   createdAt: Date | string
   updatedAt: Date | string
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
-  equipments?: Prisma.EquipmentUncheckedCreateNestedManyWithoutUserInput
+  equipmentSets?: Prisma.EquipmentSetUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutAccountsInput = {
@@ -610,7 +610,7 @@ export type UserUpdateWithoutAccountsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
-  equipments?: Prisma.EquipmentUpdateManyWithoutUserNestedInput
+  equipmentSets?: Prisma.EquipmentSetUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutAccountsInput = {
@@ -622,7 +622,7 @@ export type UserUncheckedUpdateWithoutAccountsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
-  equipments?: Prisma.EquipmentUncheckedUpdateManyWithoutUserNestedInput
+  equipmentSets?: Prisma.EquipmentSetUncheckedUpdateManyWithoutUserNestedInput
 }
 
 
@@ -633,13 +633,13 @@ export type UserUncheckedUpdateWithoutAccountsInput = {
 export type UserCountOutputType = {
   sessions: number
   accounts: number
-  equipments: number
+  equipmentSets: number
 }
 
 export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   sessions?: boolean | UserCountOutputTypeCountSessionsArgs
   accounts?: boolean | UserCountOutputTypeCountAccountsArgs
-  equipments?: boolean | UserCountOutputTypeCountEquipmentsArgs
+  equipmentSets?: boolean | UserCountOutputTypeCountEquipmentSetsArgs
 }
 
 /**
@@ -669,8 +669,8 @@ export type UserCountOutputTypeCountAccountsArgs<ExtArgs extends runtime.Types.E
 /**
  * UserCountOutputType without action
  */
-export type UserCountOutputTypeCountEquipmentsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  where?: Prisma.EquipmentWhereInput
+export type UserCountOutputTypeCountEquipmentSetsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.EquipmentSetWhereInput
 }
 
 
@@ -684,7 +684,7 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   updatedAt?: boolean
   sessions?: boolean | Prisma.User$sessionsArgs<ExtArgs>
   accounts?: boolean | Prisma.User$accountsArgs<ExtArgs>
-  equipments?: boolean | Prisma.User$equipmentsArgs<ExtArgs>
+  equipmentSets?: boolean | Prisma.User$equipmentSetsArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["user"]>
 
@@ -722,7 +722,7 @@ export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = run
 export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   sessions?: boolean | Prisma.User$sessionsArgs<ExtArgs>
   accounts?: boolean | Prisma.User$accountsArgs<ExtArgs>
-  equipments?: boolean | Prisma.User$equipmentsArgs<ExtArgs>
+  equipmentSets?: boolean | Prisma.User$equipmentSetsArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type UserIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -733,7 +733,7 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   objects: {
     sessions: Prisma.$SessionPayload<ExtArgs>[]
     accounts: Prisma.$AccountPayload<ExtArgs>[]
-    equipments: Prisma.$EquipmentPayload<ExtArgs>[]
+    equipmentSets: Prisma.$EquipmentSetPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1139,7 +1139,7 @@ export interface Prisma__UserClient<T, Null = never, ExtArgs extends runtime.Typ
   readonly [Symbol.toStringTag]: "PrismaPromise"
   sessions<T extends Prisma.User$sessionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$sessionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SessionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   accounts<T extends Prisma.User$accountsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$accountsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AccountPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
-  equipments<T extends Prisma.User$equipmentsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$equipmentsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$EquipmentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  equipmentSets<T extends Prisma.User$equipmentSetsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$equipmentSetsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$EquipmentSetPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1612,27 +1612,27 @@ export type User$accountsArgs<ExtArgs extends runtime.Types.Extensions.InternalA
 }
 
 /**
- * User.equipments
+ * User.equipmentSets
  */
-export type User$equipmentsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+export type User$equipmentSetsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   /**
-   * Select specific fields to fetch from the Equipment
+   * Select specific fields to fetch from the EquipmentSet
    */
-  select?: Prisma.EquipmentSelect<ExtArgs> | null
+  select?: Prisma.EquipmentSetSelect<ExtArgs> | null
   /**
-   * Omit specific fields from the Equipment
+   * Omit specific fields from the EquipmentSet
    */
-  omit?: Prisma.EquipmentOmit<ExtArgs> | null
+  omit?: Prisma.EquipmentSetOmit<ExtArgs> | null
   /**
    * Choose, which related nodes to fetch as well
    */
-  include?: Prisma.EquipmentInclude<ExtArgs> | null
-  where?: Prisma.EquipmentWhereInput
-  orderBy?: Prisma.EquipmentOrderByWithRelationInput | Prisma.EquipmentOrderByWithRelationInput[]
-  cursor?: Prisma.EquipmentWhereUniqueInput
+  include?: Prisma.EquipmentSetInclude<ExtArgs> | null
+  where?: Prisma.EquipmentSetWhereInput
+  orderBy?: Prisma.EquipmentSetOrderByWithRelationInput | Prisma.EquipmentSetOrderByWithRelationInput[]
+  cursor?: Prisma.EquipmentSetWhereUniqueInput
   take?: number
   skip?: number
-  distinct?: Prisma.EquipmentScalarFieldEnum | Prisma.EquipmentScalarFieldEnum[]
+  distinct?: Prisma.EquipmentSetScalarFieldEnum | Prisma.EquipmentSetScalarFieldEnum[]
 }
 
 /**

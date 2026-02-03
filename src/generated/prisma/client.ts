@@ -45,6 +45,11 @@ export { Prisma }
  */
 export type User = Prisma.UserModel
 /**
+ * Model EquipmentSet
+ * 
+ */
+export type EquipmentSet = Prisma.EquipmentSetModel
+/**
  * Model Equipment
  * 
  */

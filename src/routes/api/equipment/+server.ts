@@ -3,24 +3,36 @@ import type { RequestHandler } from './$types';
 import prisma from '$lib/server/prisma';
 import { auth } from '$lib/server/auth';
 
-// GET - Récupérer tous les équipements de l'utilisateur
-export const GET: RequestHandler = async ({ request }) => {
+// GET - Récupérer les équipements d'un set spécifique
+export const GET: RequestHandler = async ({ request, url }) => {
   const session = await auth.api.getSession({ headers: request.headers });
 
   if (!session?.user?.id) {
     return json({ error: 'Non authentifié' }, { status: 401 });
   }
 
-  const equipments = await prisma.equipment.findMany({
-    where: { userId: session.user.id },
+  const setId = url.searchParams.get('setId');
+
+  if (!setId) {
+    return json({ error: 'setId requis' }, { status: 400 });
+  }
+
+  // Vérifier que le set appartient à l'utilisateur
+  const set = await prisma.equipmentSet.findFirst({
+    where: { id: parseInt(setId), userId: session.user.id },
+    include: { equipments: true },
   });
+
+  if (!set) {
+    return json({ error: 'Set non trouvé' }, { status: 404 });
+  }
 
   // Transformer en format attendu par le frontend
   const equippedItems: Record<string, any> = {};
   const equipmentPrices: Record<string, number> = {};
   const equipmentBought: Record<string, boolean> = {};
 
-  for (const eq of equipments) {
+  for (const eq of set.equipments) {
     equippedItems[eq.slot] = eq.itemData;
     equipmentPrices[eq.slot] = eq.price;
     equipmentBought[eq.slot] = eq.bought;
@@ -29,7 +41,7 @@ export const GET: RequestHandler = async ({ request }) => {
   return json({ equippedItems, equipmentPrices, equipmentBought });
 };
 
-// POST - Sauvegarder/mettre à jour un équipement
+// POST - Sauvegarder/mettre à jour un équipement dans un set
 export const POST: RequestHandler = async ({ request }) => {
   const session = await auth.api.getSession({ headers: request.headers });
 
@@ -37,16 +49,25 @@ export const POST: RequestHandler = async ({ request }) => {
     return json({ error: 'Non authentifié' }, { status: 401 });
   }
 
-  const { slot, itemData, price, bought } = await request.json();
+  const { setId, slot, itemData, price, bought } = await request.json();
 
-  if (!slot) {
-    return json({ error: 'Slot requis' }, { status: 400 });
+  if (!setId || !slot) {
+    return json({ error: 'setId et slot requis' }, { status: 400 });
+  }
+
+  // Vérifier que le set appartient à l'utilisateur
+  const set = await prisma.equipmentSet.findFirst({
+    where: { id: setId, userId: session.user.id },
+  });
+
+  if (!set) {
+    return json({ error: 'Set non trouvé' }, { status: 404 });
   }
 
   // Si itemData est null, supprimer l'équipement
   if (itemData === null) {
     await prisma.equipment.deleteMany({
-      where: { userId: session.user.id, slot },
+      where: { setId, slot },
     });
     return json({ success: true });
   }
@@ -54,7 +75,7 @@ export const POST: RequestHandler = async ({ request }) => {
   // Upsert l'équipement
   await prisma.equipment.upsert({
     where: {
-      userId_slot: { userId: session.user.id, slot },
+      setId_slot: { setId, slot },
     },
     update: {
       itemData,
@@ -62,7 +83,7 @@ export const POST: RequestHandler = async ({ request }) => {
       bought: bought ?? false,
     },
     create: {
-      userId: session.user.id,
+      setId,
       slot,
       itemData,
       price: price ?? 0,
@@ -81,10 +102,19 @@ export const PUT: RequestHandler = async ({ request }) => {
     return json({ error: 'Non authentifié' }, { status: 401 });
   }
 
-  const { slot, price, bought } = await request.json();
+  const { setId, slot, price, bought } = await request.json();
 
-  if (!slot) {
-    return json({ error: 'Slot requis' }, { status: 400 });
+  if (!setId || !slot) {
+    return json({ error: 'setId et slot requis' }, { status: 400 });
+  }
+
+  // Vérifier que le set appartient à l'utilisateur
+  const set = await prisma.equipmentSet.findFirst({
+    where: { id: setId, userId: session.user.id },
+  });
+
+  if (!set) {
+    return json({ error: 'Set non trouvé' }, { status: 404 });
   }
 
   const updateData: any = {};
@@ -92,14 +122,14 @@ export const PUT: RequestHandler = async ({ request }) => {
   if (bought !== undefined) updateData.bought = bought;
 
   await prisma.equipment.updateMany({
-    where: { userId: session.user.id, slot },
+    where: { setId, slot },
     data: updateData,
   });
 
   return json({ success: true });
 };
 
-// DELETE - Supprimer tous les équipements (pour réimport)
+// DELETE - Supprimer tous les équipements d'un set
 export const DELETE: RequestHandler = async ({ request }) => {
   const session = await auth.api.getSession({ headers: request.headers });
 
@@ -107,8 +137,23 @@ export const DELETE: RequestHandler = async ({ request }) => {
     return json({ error: 'Non authentifié' }, { status: 401 });
   }
 
+  const { setId } = await request.json();
+
+  if (!setId) {
+    return json({ error: 'setId requis' }, { status: 400 });
+  }
+
+  // Vérifier que le set appartient à l'utilisateur
+  const set = await prisma.equipmentSet.findFirst({
+    where: { id: setId, userId: session.user.id },
+  });
+
+  if (!set) {
+    return json({ error: 'Set non trouvé' }, { status: 404 });
+  }
+
   await prisma.equipment.deleteMany({
-    where: { userId: session.user.id },
+    where: { setId },
   });
 
   return json({ success: true });

@@ -385,6 +385,7 @@ type FieldRefInputType<Model, FieldType> = Model extends never ? never : FieldRe
 
 export const ModelName = {
   User: 'User',
+  EquipmentSet: 'EquipmentSet',
   Equipment: 'Equipment',
   Session: 'Session',
   Account: 'Account',
@@ -405,7 +406,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "equipment" | "session" | "account" | "verification" | "item"
+    modelProps: "user" | "equipmentSet" | "equipment" | "session" | "account" | "verification" | "item"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -480,6 +481,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         count: {
           args: Prisma.UserCountArgs<ExtArgs>
           result: runtime.Types.Utils.Optional<Prisma.UserCountAggregateOutputType> | number
+        }
+      }
+    }
+    EquipmentSet: {
+      payload: Prisma.$EquipmentSetPayload<ExtArgs>
+      fields: Prisma.EquipmentSetFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.EquipmentSetFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EquipmentSetPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.EquipmentSetFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EquipmentSetPayload>
+        }
+        findFirst: {
+          args: Prisma.EquipmentSetFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EquipmentSetPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.EquipmentSetFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EquipmentSetPayload>
+        }
+        findMany: {
+          args: Prisma.EquipmentSetFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EquipmentSetPayload>[]
+        }
+        create: {
+          args: Prisma.EquipmentSetCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EquipmentSetPayload>
+        }
+        createMany: {
+          args: Prisma.EquipmentSetCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.EquipmentSetCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EquipmentSetPayload>[]
+        }
+        delete: {
+          args: Prisma.EquipmentSetDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EquipmentSetPayload>
+        }
+        update: {
+          args: Prisma.EquipmentSetUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EquipmentSetPayload>
+        }
+        deleteMany: {
+          args: Prisma.EquipmentSetDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.EquipmentSetUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.EquipmentSetUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EquipmentSetPayload>[]
+        }
+        upsert: {
+          args: Prisma.EquipmentSetUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EquipmentSetPayload>
+        }
+        aggregate: {
+          args: Prisma.EquipmentSetAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateEquipmentSet>
+        }
+        groupBy: {
+          args: Prisma.EquipmentSetGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.EquipmentSetGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.EquipmentSetCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.EquipmentSetCountAggregateOutputType> | number
         }
       }
     }
@@ -905,9 +980,21 @@ export const UserScalarFieldEnum = {
 export type UserScalarFieldEnum = (typeof UserScalarFieldEnum)[keyof typeof UserScalarFieldEnum]
 
 
-export const EquipmentScalarFieldEnum = {
+export const EquipmentSetScalarFieldEnum = {
   id: 'id',
   userId: 'userId',
+  name: 'name',
+  includeInObjective: 'includeInObjective',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type EquipmentSetScalarFieldEnum = (typeof EquipmentSetScalarFieldEnum)[keyof typeof EquipmentSetScalarFieldEnum]
+
+
+export const EquipmentScalarFieldEnum = {
+  id: 'id',
+  setId: 'setId',
   slot: 'slot',
   itemData: 'itemData',
   price: 'price',
@@ -1204,6 +1291,7 @@ export type PrismaClientOptions = ({
 }
 export type GlobalOmitConfig = {
   user?: Prisma.UserOmit
+  equipmentSet?: Prisma.EquipmentSetOmit
   equipment?: Prisma.EquipmentOmit
   session?: Prisma.SessionOmit
   account?: Prisma.AccountOmit

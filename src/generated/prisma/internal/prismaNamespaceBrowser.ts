@@ -52,6 +52,7 @@ export const AnyNull = runtime.AnyNull
 
 export const ModelName = {
   User: 'User',
+  EquipmentSet: 'EquipmentSet',
   Equipment: 'Equipment',
   Session: 'Session',
   Account: 'Account',
@@ -88,9 +89,21 @@ export const UserScalarFieldEnum = {
 export type UserScalarFieldEnum = (typeof UserScalarFieldEnum)[keyof typeof UserScalarFieldEnum]
 
 
-export const EquipmentScalarFieldEnum = {
+export const EquipmentSetScalarFieldEnum = {
   id: 'id',
   userId: 'userId',
+  name: 'name',
+  includeInObjective: 'includeInObjective',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type EquipmentSetScalarFieldEnum = (typeof EquipmentSetScalarFieldEnum)[keyof typeof EquipmentSetScalarFieldEnum]
+
+
+export const EquipmentScalarFieldEnum = {
+  id: 'id',
+  setId: 'setId',
   slot: 'slot',
   itemData: 'itemData',
   price: 'price',
