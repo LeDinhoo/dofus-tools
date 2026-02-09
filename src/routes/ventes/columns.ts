@@ -114,6 +114,7 @@ export const columns: ColumnDef<Item>[] = [
   {
     accessorKey: "prixPropose",
     header: "Prix Proposé",
+    enableSorting: false,
     cell: ({ row }) => {
       const prixAchat = row.original.prixAchat;
       const size = row.original.size;
@@ -251,6 +252,7 @@ export const columns: ColumnDef<Item>[] = [
   {
     accessorKey: "tempsVente",
     header: "Temps de vente",
+    enableSorting: false,
     cell: ({ row }) => {
       const soldAt = row.original.soldAt;
       const createdAt = row.original.createdAt;
@@ -318,6 +320,7 @@ export const columns: ColumnDef<Item>[] = [
   {
     id: "actions",
     header: "",
+    enableSorting: false,
     cell: ({ row }) => {
       return renderComponent(ActionCell, {
         id: row.original.id,
