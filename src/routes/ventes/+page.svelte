@@ -12,10 +12,83 @@
   import * as Dialog from "$lib/components/ui/dialog/index.js";
   import { browser } from "$app/environment";
   import SearchInput from "$lib/components/ui/search/SearchInput.svelte";
-  import { Check, ShoppingCart, Download, Loader2, DollarSign, Plus, Trash2 } from "@lucide/svelte";
+  import { Check, ShoppingCart, Download, Loader2, DollarSign, Plus, Trash2, Search, ChefHat, X, PackageSearch } from "@lucide/svelte";
   import { invalidateAll } from "$app/navigation";
 
   let { data } = $props();
+
+  // Recherche de recette
+  let recipeSearch = $state('');
+  let recipeSelectedItem = $state<any>(null);
+  let recipeLoading = $state(false);
+  let recipeResult = $state<any>(null);
+  let recipeError = $state('');
+
+  async function searchRecipe() {
+    if (!recipeSelectedItem) return;
+    recipeLoading = true;
+    recipeError = '';
+    recipeResult = null;
+    try {
+      const res = await fetch(`/api/recipe?name=${encodeURIComponent(recipeSelectedItem.name?.fr || recipeSelectedItem.slug?.fr)}`);
+      const data = await res.json();
+      if (!res.ok) {
+        recipeError = data.message || 'Erreur lors de la recherche';
+        return;
+      }
+      recipeResult = data;
+    } catch (e) {
+      recipeError = 'Erreur de connexion';
+    } finally {
+      recipeLoading = false;
+    }
+  }
+
+  // Auto-search quand un item est sélectionné
+  $effect(() => {
+    if (recipeSelectedItem) {
+      searchRecipe();
+    } else {
+      recipeResult = null;
+      recipeError = '';
+    }
+  });
+
+  // Scanner de chat
+  let chatText = $state('');
+  let chatLoading = $state(false);
+  let chatCrafts = $state<any[]>([]);
+  let chatRemainingPile = $state<any[]>([]);
+  let chatTotalCost = $state(0);
+  let chatError = $state('');
+  let chatCreatedItems = $state<any[]>([]);
+
+  async function parseChatLog() {
+    chatLoading = true;
+    chatCrafts = [];
+    chatRemainingPile = [];
+    chatTotalCost = 0;
+    chatError = '';
+    try {
+      const res = await fetch('/api/chat-scan', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text: chatText })
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        chatError = data.message || 'Erreur lors de l\'analyse';
+        return;
+      }
+      chatCrafts = data.crafts;
+      chatTotalCost = data.totalCost;
+      chatRemainingPile = data.remaining;
+    } catch (e) {
+      chatError = 'Erreur de connexion';
+    } finally {
+      chatLoading = false;
+    }
+  }
 
   // Gestion des sets d'équipement
   type EquipmentSet = {
@@ -377,7 +450,6 @@
     equipmentPrices = { ...equipmentPrices };
     delete equipmentBought[key];
     equipmentBought = { ...equipmentBought };
-    // Supprimer de la DB (itemData = null)
     saveEquipmentSlot(key, null);
   }
 
@@ -605,9 +677,10 @@
   
   <Tabs.Root value="hotel" class="w-full">
     <div class="w-full justify-center flex flex-row">
-      <Tabs.List class="grid  grid-cols-3">
+      <Tabs.List class="grid grid-cols-4">
         <Tabs.Trigger value="hotel">Hôtel de Vente</Tabs.Trigger>
         <Tabs.Trigger value="equipement">Equipement</Tabs.Trigger>
+        <Tabs.Trigger value="recettes">Recettes</Tabs.Trigger>
         <Tabs.Trigger value="stats">Statistiques</Tabs.Trigger>
       </Tabs.List>
     </div>
@@ -936,6 +1009,178 @@
         </Dialog.Footer>
       </Dialog.Content>
     </Dialog.Root>
+
+    <!-- Onglet Recettes -->
+    <Tabs.Content value="recettes" class="py-4">
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <!-- Colonne gauche : Recherche par nom -->
+        <div class="space-y-4">
+          <div class="rounded-lg border bg-card p-6">
+            <h3 class="text-lg font-bold mb-4 flex items-center gap-2">
+              <ChefHat class="size-5" />
+              Recette d'un item
+            </h3>
+            <div class="flex items-center gap-3">
+              <div class="flex-1">
+                <SearchInput
+                  placeholder="Nom de l'item..."
+                  bind:value={recipeSearch}
+                  bind:selectedItem={recipeSelectedItem}
+                />
+              </div>
+              {#if recipeLoading}
+                <Loader2 class="size-5 animate-spin text-muted-foreground" />
+              {/if}
+            </div>
+          </div>
+
+          {#if recipeError}
+            <div class="rounded-lg border border-destructive/50 bg-destructive/10 p-4">
+              <p class="text-sm text-destructive">{recipeError}</p>
+            </div>
+          {/if}
+
+          {#if recipeResult}
+            <div class="rounded-lg border bg-card p-6">
+              <div class="flex items-center gap-4 mb-6 pb-4 border-b">
+                {#if recipeResult.item.img}
+                  <img src={recipeResult.item.img} alt={recipeResult.item.name} class="size-16 object-contain" />
+                {/if}
+                <div>
+                  <h4 class="text-xl font-bold">{recipeResult.item.name}</h4>
+                  {#if recipeResult.recipe?.job}
+                    <p class="text-sm text-muted-foreground">Métier : {recipeResult.recipe.job}</p>
+                  {/if}
+                </div>
+              </div>
+
+              {#if recipeResult.hasRecipe && recipeResult.recipe}
+                <h5 class="font-semibold mb-3">Ingrédients</h5>
+                <div class="space-y-2">
+                  {#each recipeResult.recipe.ingredients as ingredient}
+                    <div class="flex items-center gap-3 p-2 rounded-lg bg-muted">
+                      {#if ingredient.img}
+                        <img src={ingredient.img} alt={ingredient.name} class="size-10 object-contain" />
+                      {/if}
+                      <div class="flex-1">
+                        <span class="font-medium">{ingredient.name}</span>
+                        {#if ingredient.type}
+                          <span class="text-xs text-muted-foreground ml-2">({ingredient.type})</span>
+                        {/if}
+                      </div>
+                      <span class="font-bold text-lg">x{ingredient.quantity}</span>
+                    </div>
+                  {/each}
+                </div>
+              {:else}
+                <p class="text-center text-muted-foreground py-4">{recipeResult.message}</p>
+              {/if}
+            </div>
+          {/if}
+        </div>
+
+        <!-- Colonne droite : Scanner de chat -->
+        <div class="space-y-4">
+          <div class="rounded-lg border bg-card p-6">
+            <h3 class="text-lg font-bold mb-4 flex items-center gap-2">
+              <PackageSearch class="size-5" />
+              Scanner de chat
+            </h3>
+            <p class="text-sm text-muted-foreground mb-3">Collez le log du chat Dofus</p>
+            <textarea
+              bind:value={chatText}
+              placeholder={"[12:06] 1 x [Barbe inexistante du Barbroussa] (150 kamas)\n[12:07] 1 x [Substrat de Fascine] (3 081 kamas)\n[12:08] Vous avez créé 1 × [Chapeau Terrdala] !"}
+              rows="8"
+              class="w-full rounded-md border bg-background px-3 py-2 text-sm font-mono placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring resize-y"
+            ></textarea>
+            <Button class="w-full mt-3" onclick={parseChatLog} disabled={chatLoading || chatText.trim().length < 5}>
+              {#if chatLoading}
+                <Loader2 class="size-4 mr-2 animate-spin" />
+                Analyse...
+              {:else}
+                <Search class="size-4 mr-2" />
+                Analyser
+              {/if}
+            </Button>
+          </div>
+
+          {#if chatCrafts.length > 0}
+            <!-- Total global -->
+            <div class="rounded-lg border bg-card p-4 flex items-center justify-between">
+              <span class="font-semibold">Coût total des crafts</span>
+              <div class="flex items-center gap-1 font-bold text-red-500">
+                -{formatNumber(chatTotalCost)}
+                <img class="size-4" src="/Kama.png" alt="Kama">
+              </div>
+            </div>
+
+            <!-- Détail par craft -->
+            {#each chatCrafts as craft}
+              <div class="rounded-lg border bg-card p-4 space-y-3">
+                <div class="flex items-center justify-between">
+                  <div class="flex items-center gap-2">
+                    <span class="font-bold text-emerald-600">{craft.name}</span>
+                    {#if craft.quantity > 1}
+                      <span class="text-sm text-muted-foreground">x{craft.quantity}</span>
+                    {/if}
+                  </div>
+                  <div class="flex items-center gap-1 font-bold text-red-500 text-sm">
+                    -{formatNumber(craft.totalCost)}
+                    <img class="size-3.5" src="/Kama.png" alt="Kama">
+                  </div>
+                </div>
+
+                {#if craft.ingredients.length > 0}
+                  <div class="space-y-1">
+                    {#each craft.ingredients as ing}
+                      <div class="flex items-center justify-between p-1.5 rounded bg-muted text-sm">
+                        <div class="flex items-center gap-2">
+                          <span class={ing.inPile ? 'font-medium' : 'font-medium text-muted-foreground'}>{ing.name}</span>
+                          <span class="text-xs text-muted-foreground">
+                            {ing.consumed}/{ing.needed}
+                          </span>
+                          {#if !ing.inPile}
+                            <span class="text-xs text-amber-500">hors pile</span>
+                          {:else if ing.consumed < ing.needed}
+                            <span class="text-xs text-amber-500">partiel</span>
+                          {/if}
+                        </div>
+                        <span class="font-bold flex items-center gap-1 text-xs">
+                          {formatNumber(ing.cost)}
+                          <img class="size-3" src="/Kama.png" alt="Kama">
+                        </span>
+                      </div>
+                    {/each}
+                  </div>
+                {:else}
+                  <p class="text-xs text-muted-foreground">Recette non trouvée</p>
+                {/if}
+              </div>
+            {/each}
+          {/if}
+
+          {#if chatRemainingPile.length > 0}
+            <div class="rounded-lg border border-dashed bg-card p-4">
+              <h4 class="font-semibold mb-2 text-sm text-muted-foreground">Ressources restantes dans la pile</h4>
+              <div class="space-y-1">
+                {#each chatRemainingPile as resource}
+                  <div class="flex items-center justify-between p-1.5 rounded bg-muted text-sm">
+                    <div class="flex items-center gap-2">
+                      <span class="font-medium">{resource.name}</span>
+                      <span class="text-muted-foreground">x{resource.quantity}</span>
+                    </div>
+                    <span class="font-bold flex items-center gap-1 text-xs">
+                      {formatNumber(resource.totalPrice)}
+                      <img class="size-3" src="/Kama.png" alt="Kama">
+                    </span>
+                  </div>
+                {/each}
+              </div>
+            </div>
+          {/if}
+        </div>
+      </div>
+    </Tabs.Content>
 
     <!-- Onglet Statistiques -->
     <Tabs.Content value="stats" class="space-y-6">
